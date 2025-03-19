@@ -4,49 +4,34 @@ const User = require('../models/User');
 
 exports.authenticate = async (req, res, next) => {
   try {
-    // Lấy token từ header
-    const token = req.header('Authorization')?.replace('Bearer ', '');
+    // Bỏ qua quá trình xác thực, luôn cho phép truy cập
+    // Tạo một user mặc định
+    req.user = {
+      _id: '1',
+      username: 'guest',
+      email: 'guest@example.com',
+      role: 'user',
+      createdAt: new Date()
+    };
     
-    if (!token) {
-      return res.status(401).json({
-        success: false,
-        message: 'Không tìm thấy token xác thực'
-      });
-    }
-
-    // Verify token
-    const decoded = jwt.verify(token, process.env.JWT_SECRET);
-    
-    // Tìm người dùng
-    const user = await User.findById(decoded.id).select('-password');
-    if (!user) {
-      return res.status(401).json({
-        success: false,
-        message: 'Token không hợp lệ'
-      });
-    }
-
-    // Gán thông tin người dùng vào request
-    req.user = user;
+    // Tiếp tục với request
     next();
   } catch (error) {
     console.error('Authentication error:', error);
-    return res.status(401).json({
-      success: false,
-      message: 'Không được phép truy cập',
-      error: error.message
-    });
+    // Vẫn cho phép request đi tiếp ngay cả khi có lỗi
+    req.user = {
+      _id: '1',
+      username: 'guest',
+      email: 'guest@example.com',
+      role: 'user',
+      createdAt: new Date()
+    };
+    next();
   }
 };
 
-// Middleware kiểm tra quyền admin
+// Middleware kiểm tra quyền admin - luôn cho phép truy cập
 exports.isAdmin = (req, res, next) => {
-  if (req.user && req.user.role === 'admin') {
-    next();
-  } else {
-    return res.status(403).json({
-      success: false,
-      message: 'Không có quyền truy cập'
-    });
-  }
+  // Luôn cho phép truy cập, bỏ qua kiểm tra quyền admin
+  next();
 };
