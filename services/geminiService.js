@@ -433,7 +433,7 @@ module.exports = {
     
     const prompt = generatePrompt('analysis', analysisData);
     const response = await callGeminiAPI(prompt, { 
-      temperature: 1.0,
+      temperature: 0.7,
       userId: userId,
       useHistory: false
     });
@@ -450,11 +450,7 @@ module.exports = {
       conversationManager.save(userId, `CONTEXT_DATA: ${analysisData.phoneNumber}`, contextMessage);
     }
     
-    // Return both the text response and analysis data
-    return {
-      text: response,
-      analysisData: analysisData
-    };
+    return response;
   },
   
   /**
@@ -466,17 +462,11 @@ module.exports = {
       analysisContext
     });
     
-    const response = await callGeminiAPI(prompt, { 
-      temperature: 1.0,
+    return callGeminiAPI(prompt, { 
+      temperature: 0.7,
       userId: userId,
       useHistory: Boolean(userId)
     });
-    
-    // Return both the text response and the original analysis data
-    return {
-      text: response,
-      analysisData: analysisContext
-    };
   },
   
   /**
@@ -501,34 +491,22 @@ module.exports = {
         analysisData: analysisData
       });
       
-      const response = await callGeminiAPI(prompt, {
-        temperature: 1.0,
+      return callGeminiAPI(prompt, {
+        temperature: 0.7,
         userId: userId,
         useHistory: true
       });
-      
-      // Return both text response and the original analysis data
-      return {
-        text: response,
-        analysisData: analysisData
-      };
     } else {
       // Use basic follow-up prompt if no specific context available
       const prompt = generatePrompt('followUp', {
         question: question
       });
       
-      const response = await callGeminiAPI(prompt, {
-        temperature: 1.0,
+      return callGeminiAPI(prompt, {
+        temperature: 0.7,
         userId: userId,
         useHistory: true
       });
-      
-      // Return just the text response without analysis data
-      return {
-        text: response,
-        analysisData: null
-      };
     }
   },
   
@@ -537,17 +515,11 @@ module.exports = {
    */
   generateComparison: async (analysisDataList, userId = null) => {
     const prompt = generatePrompt('comparison', analysisDataList);
-    const response = await callGeminiAPI(prompt, { 
+    return callGeminiAPI(prompt, { 
       temperature: 0.6,
       userId: userId,
       useHistory: false
     });
-    
-    // Return both text response and the combined analysis data
-    return {
-      text: response,
-      analysisDataList: analysisDataList
-    };
   },
   
   /**
@@ -555,17 +527,11 @@ module.exports = {
    */
   generateGeneralInfo: async (question, userId = null) => {
     const prompt = generatePrompt('general', question);
-    const response = await callGeminiAPI(prompt, { 
-      temperature: 0.7,
+    return callGeminiAPI(prompt, { 
+      temperature: 0.5,
       userId: userId,
       useHistory: Boolean(userId)
     });
-    
-    // Return just the text response for general questions (no analysis data)
-    return {
-      text: response,
-      analysisData: null
-    };
   },
   
   /**
