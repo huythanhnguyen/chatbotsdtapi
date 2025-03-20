@@ -11,7 +11,7 @@ const config = {
   API_URL: "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent",
   MAX_RETRIES: 3,
   RETRY_DELAY: 1000,
-  TEMPERATURE: 1,
+  TEMPERATURE: 1.2,
   MAX_TOKENS: 8192,
   REQUEST_TIMEOUT: 30000,
   CACHE_ENABLED: true,
@@ -85,8 +85,6 @@ const generatePrompt = (type, data) => {
           - Tính chất: ${data.last3DigitsAnalysis.firstPair?.starInfo?.nature || "Không xác định"}`
           : "Không có phân tích 3 số cuối."}
         
-        # ĐIỂM CHẤT LƯỢNG TỔNG THỂ
-        Điểm số: ${data.qualityScore || 0}/100 
         
         Tổng hợp thành câu trả lời toàn diện, chuyên nghiệp nhưng dễ hiểu, với các phần:
         1. Tính cách
@@ -191,16 +189,31 @@ const generatePrompt = (type, data) => {
       
     case 'general':
       return `
+        Thông tin về Bát Tinh (8 sao):
+        
+        # Tứ Cát (4 sao tốt):
+        1. Sinh Khí - Quý nhân, vui vẻ, may mắn, số 14, 41, 67, 76, 39, 93, 28, 82
+        2. Thiên Y - Tiền tài, tình cảm, hồi báo, số 13, 31, 68, 86, 49, 94, 27, 72
+        3. Diên Niên - Năng lực chuyên nghiệp, công việc, số 19, 91, 78, 87, 34, 43, 26, 62
+        4. Phục Vị - Chịu đựng, khó thay đổi, số 11, 22, 33, 44, 66, 77, 88, 99
+        # các bộ số có 0 sẽ làm tiêu cựccác sao này và hãy diễn giải theo chiều hướng tiêu cực ( ví dụ 140, 104..)
+        # Tứ Hung (4 sao dữ):
+        1. Họa Hại - Khẩu tài, chi tiêu lớn, lấy miệng là nghiệp, số 17, 71, 89, 98, 46, 64, 23, 32
+        2. Lục Sát - Giao tế, phục vụ, cửa hàng, nữ nhân, số 16, 61, 47, 74, 38, 83, 92, 29
+        3. Ngũ Quỷ - Trí óc, biến động, không ổn định, tư duy, số 18, 81, 79, 97, 36, 63, 24, 42
+        4. Tuyệt Mệnh - Dốc sức, đầu tư, hành động, phá tài, số 12, 21, 69, 96, 84, 48, 73, 37
+        # các bộ số có 0 sẽ làm tăng tính dữ của các sao này và có chiều hướng tiêu cực ( ví dụ 107, 170..)
         Câu hỏi: "${data}"
         
-        Trả lời dựa vào thông tin đã phân tích ở trên hãy trả lời câu hỏi.
+        Trả lời dựa trên kiến thức về phương pháp Bát Tinh và phân tích số trước đó.
       `;
       
     case 'followUp':
       return `
         Dựa trên cuộc trò chuyện trước đó về phân tích số điện thoại, hãy trả lời câu hỏi: "${data}"
         
-        Đảm bảo câu trả lời phải liên quan đến số điện thoại đã phân tích.
+        Đảm bảo câu trả lời phải liên quan đến số điện thoại đã phân tích và thông tin bộ số đã phân tích.
+       
       `;
       
     default:
@@ -418,7 +431,7 @@ module.exports = {
     
     const prompt = generatePrompt('analysis', analysisData);
     const response = await callGeminiAPI(prompt, { 
-      temperature: 1.0,
+      temperature: 1.2,
       userId: userId,
       useHistory: false
     });
@@ -448,7 +461,7 @@ module.exports = {
     });
     
     return callGeminiAPI(prompt, { 
-      temperature: 1.0,
+      temperature: 0.7,
       userId: userId,
       useHistory: Boolean(userId)
     });
@@ -468,14 +481,27 @@ module.exports = {
       analysisData = conversationManager.getContextFromHistory(userId);
     }
     
-    // If we have analysis data, use it for context
+    // If we have analysis data, use it for detailed context
     if (analysisData) {
-      return this.generateResponse(question, analysisData, userId);
-    } else {
-      // Use follow-up prompt if no specific context available
-      const prompt = generatePrompt('followUp', question);
+      // Create a rich context prompt with all analysis details
+      const prompt = generatePrompt('followUp', {
+        question: question,
+        analysisData: analysisData
+      });
+      
       return callGeminiAPI(prompt, {
-        temperature: 0.7,
+        temperature: 1.2,
+        userId: userId,
+        useHistory: true
+      });
+    } else {
+      // Use basic follow-up prompt if no specific context available
+      const prompt = generatePrompt('followUp', {
+        question: question
+      });
+      
+      return callGeminiAPI(prompt, {
+        temperature: 1.2,
         userId: userId,
         useHistory: true
       });
@@ -488,7 +514,7 @@ module.exports = {
   generateComparison: async (analysisDataList, userId = null) => {
     const prompt = generatePrompt('comparison', analysisDataList);
     return callGeminiAPI(prompt, { 
-      temperature: 0.6,
+      temperature: 1.0,
       userId: userId,
       useHistory: false
     });
@@ -500,7 +526,7 @@ module.exports = {
   generateGeneralInfo: async (question, userId = null) => {
     const prompt = generatePrompt('general', question);
     return callGeminiAPI(prompt, { 
-      temperature: 0.5,
+      temperature: 1.6,
       userId: userId,
       useHistory: Boolean(userId)
     });
