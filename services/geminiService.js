@@ -100,34 +100,49 @@ const generatePrompt = (type, data) => {
       
     case 'question':
       const formattedPhone = data.analysisContext?.phoneNumber?.replace(/(\d{4})(\d{3})(\d{3})/, '$1 $2 $3') || '';
-      const sortedStars = data.analysisContext?.starSequence ? 
-        [...data.analysisContext.starSequence].sort((a, b) => (b.energyLevel || 0) - (a.energyLevel || 0)) : [];
-      const topStars = sortedStars.slice(0, 3);
       
       return `
         Quan trọng: LÀ CHUYÊN GIA PHÂN TÍCH SỐ ĐIỆN THOẠI, hãy trả lời chi tiết về số điện thoại ${formattedPhone} liên quan đến câu hỏi: "${data.question}"
         
         THÔNG TIN PHÂN TÍCH SỐ ĐIỆN THOẠI ${formattedPhone}:
         
-        # CÁC SAO CHỦ ĐẠO:
-        ${topStars.map(star => 
-          `- ${star.name} (${star.nature}, Năng lượng: ${star.energyLevel || 0}/4): 
-           ${star.description || ""}
-           Cặp số: ${star.originalPair}`
+ # THÔNG TIN CHI TIẾT VỀ CÁC SAO
+        ${data.starSequence.map(star => 
+          `- ${star.originalPair}: ${star.name} (${star.nature}, Năng lượng: ${star.energyLevel || 0}/4)
+          Ý nghĩa: ${star.description || "Không có mô tả"}`
         ).join('\n\n')}
         
-        # CÁC SAO KHÁC:
-        ${sortedStars.slice(3).map(star => 
-          `- ${star.name} (${star.nature}, Năng lượng: ${star.energyLevel || 0}/4)`
-        ).join('\n')}
-                
-        ${data.analysisContext?.keyCombinations && data.analysisContext.keyCombinations.length > 0 ? 
-          `# TỔ HỢP ĐẶC BIỆT:\n${data.analysisContext.keyCombinations.map(c => `- ${c.value}: ${c.description}`).join('\n')}` 
+        # TỔ HỢP SỐ ĐẶC BIỆT
+        ${data.keyCombinations && data.keyCombinations.length > 0 ? 
+          data.keyCombinations.map(combo => 
+            `- ${combo.value}: ${combo.description || "Không có mô tả"}`
+          ).join('\n')
+          : "Không có tổ hợp số đặc biệt."}
+        
+        # CẢNH BÁO
+        ${data.dangerousCombinations && data.dangerousCombinations.length > 0 ?
+          data.dangerousCombinations.map(warning => 
+            `- ${warning.combination}: ${warning.description || "Không có mô tả"}`
+          ).join('\n')
+          : "Không có cảnh báo đặc biệt."}
+        
+        # PHÂN TÍCH VỊ TRÍ SỐ ĐẶC BIỆT
+        ${data.keyPositions ? 
+          `- Số cuối: ${data.keyPositions.lastDigit.value} - ${data.keyPositions.lastDigit.meaning || "Không có ý nghĩa"}`
+          : "Không có phân tích vị trí số."}
+        ${data.keyPositions && data.keyPositions.thirdFromEnd ? 
+          `- Số thứ 3 từ cuối: ${data.keyPositions.thirdFromEnd.value} - ${data.keyPositions.thirdFromEnd.meaning || "Không có ý nghĩa"}` 
           : ""}
-          
-        ${data.analysisContext?.dangerousCombinations && data.analysisContext.dangerousCombinations.length > 0 ? 
-          `# CẢNH BÁO:\n${data.analysisContext.dangerousCombinations.map(c => `- ${c.combination}: ${c.description}`).join('\n')}` 
+        ${data.keyPositions && data.keyPositions.fifthFromEnd ? 
+          `- Số thứ 5 từ cuối: ${data.keyPositions.fifthFromEnd.value} - ${data.keyPositions.fifthFromEnd.meaning || "Không có ý nghĩa"}` 
           : ""}
+        
+        # PHÂN TÍCH 3 SỐ CUỐI
+        ${data.last3DigitsAnalysis ? 
+          `- Cặp số cuối: ${data.last3DigitsAnalysis.lastThreeDigits || "Không xác định"}
+          - Sao tương ứng: ${data.last3DigitsAnalysis.firstPair?.starInfo?.name || "Không xác định"}
+          - Tính chất: ${data.last3DigitsAnalysis.firstPair?.starInfo?.nature || "Không xác định"}`
+          : "Không có phân tích 3 số cuối."}
         
         Hãy trả lời câu hỏi "${data.question}" dựa trên phân tích trên. Cụ thể, chi tiết và chính xác về các khía cạnh liên quan đến câu hỏi.
       `;
