@@ -11,7 +11,7 @@ const config = {
   API_URL: "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent",
   MAX_RETRIES: 3,
   RETRY_DELAY: 1000,
-  TEMPERATURE: 1.0,
+  TEMPERATURE: 0.8,
   MAX_TOKENS: 8192,
   REQUEST_TIMEOUT: 30000,
   CACHE_ENABLED: true,
@@ -44,8 +44,7 @@ const generatePrompt = (type, data) => {
   switch (type) {
     case 'analysis':
       return `
-        Hãy tổng hợp và giải thích ý nghĩa theo các luận giải sau đây về số điện thoại ${data.phoneNumber}.
-        Mỗi giải thích kèm theo star hoặc number hoặc combo là reason.
+        Buoc 1: hay dua cho nguoi dung cac thong tin sau, khong them bot, ghi dung cau truc nhu sau
         
         # THÔNG TIN CHI TIẾT VỀ CÁC SAO
         ${data.starSequence.map(star => 
@@ -84,10 +83,9 @@ const generatePrompt = (type, data) => {
           - Sao tương ứng: ${data.last3DigitsAnalysis.firstPair?.starInfo?.name || "Không xác định"}
           - Tính chất: ${data.last3DigitsAnalysis.firstPair?.starInfo?.nature || "Không xác định"}`
           : "Không có phân tích 3 số cuối."}
-        
-        # ĐIỂM CHẤT LƯỢNG TỔNG THỂ
-        Điểm số: ${data.qualityScore || 0}/100 
-        
+         
+        Sau do, Hãy tổng hợp và giải thích ý nghĩa theo các luận giải sau đây về số điện thoại ${data.phoneNumber}.
+        Mỗi giải thích kèm theo star hoặc number hoặc combo là reason.
         Tổng hợp thành câu trả lời toàn diện, chuyên nghiệp nhưng dễ hiểu, với các phần:
         1. Tính cách
         2. Sự nghiệp
@@ -122,17 +120,7 @@ const generatePrompt = (type, data) => {
         ${sortedStars.slice(3).map(star => 
           `- ${star.name} (${star.nature}, Năng lượng: ${star.energyLevel || 0}/4)`
         ).join('\n')}
-        
-        # CÂN BẰNG NĂNG LƯỢNG: 
-        ${data.analysisContext?.balanceText || data.analysisContext?.balance || "Không xác định"}
-        
-        # NĂNG LƯỢNG: 
-        ${data.analysisContext?.energyLevel ? 
-          `Tổng: ${data.analysisContext.energyLevel.total}, 
-           Cát: ${data.analysisContext.energyLevel.cat}, 
-           Hung: ${data.analysisContext.energyLevel.hung}` 
-          : "Không có thông tin"}
-        
+                
         ${data.analysisContext?.keyCombinations && data.analysisContext.keyCombinations.length > 0 ? 
           `# TỔ HỢP ĐẶC BIỆT:\n${data.analysisContext.keyCombinations.map(c => `- ${c.value}: ${c.description}`).join('\n')}` 
           : ""}
