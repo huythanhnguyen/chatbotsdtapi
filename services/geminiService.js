@@ -51,7 +51,7 @@ const generatePrompt = (type, data) => {
         # THÔNG TIN CHI TIẾT VỀ CÁC SAO
         ${data.starSequence.map(star => 
           `- ${star.originalPair}: ${star.name} (${star.nature}, Năng lượng: ${star.energyLevel || 0}/4)
-          Ý nghĩa: ${star.description || "Không có mô tả"}`
+          Ý nghĩa: ${star.detailedDescription || "Không có mô tả"}`
         ).join('\n\n')}
         
         # TỔ HỢP SỐ ĐẶC BIỆT
@@ -112,13 +112,13 @@ const generatePrompt = (type, data) => {
  # THÔNG TIN CHI TIẾT VỀ CÁC SAO
         ${data.starSequence.map(star => 
           `- ${star.originalPair}: ${star.name} (${star.nature}, Năng lượng: ${star.energyLevel || 0}/4)
-          Ý nghĩa: ${star.description || "Không có mô tả"}`
+          Ý nghĩa: ${star.detailedDescription || "Không có mô tả"}`
         ).join('\n\n')}
         
         # TỔ HỢP SỐ ĐẶC BIỆT
         ${data.keyCombinations && data.keyCombinations.length > 0 ? 
           data.keyCombinations.map(combo => 
-            `- ${combo.value}: ${combo.description || "Không có mô tả"}`
+            `- ${combo.value}: ${combo.detailedDescription || "Không có mô tả"}`
           ).join('\n')
           : "Không có tổ hợp số đặc biệt."}
         
