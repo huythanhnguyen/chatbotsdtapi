@@ -29,8 +29,8 @@ const MAX_CONVERSATION_TURNS = 10;
  */
 const getSystemPrompt = () => `
   Hãy đóng vai một nhà chiêm tinh phân tích số điện thoại dựa trên phương pháp Tứ Cát Tứ Hung (Bát Tinh).
-  Trả lời ngắn gọn, rõ ràng. Nêu rõ nguồn gốc phân tích (sao nào, cặp số nào).
-  Ưu tiên các sao có năng lượng cao (3-4) và các cặp số lặp lại.
+  Tong hop tu phan tich thong tin ben duoi, neu ro nguồn gốc phân tích (sao nào, cặp số nào).
+  Ưu tiên các sao có năng lượng cao (3-4) và các cặp số lặp lại, 3 so cuoi va cac cac sao di canh nhau.
   Trả lời bằng tiếng Việt với các mục: Tính cách, Sự nghiệp, Tiền tài, Đầu tư/Rủi ro, Gia đình/Tình cảm, Bạn bè/Quý nhân, Sức khỏe.
 `;
 
@@ -44,7 +44,9 @@ const generatePrompt = (type, data) => {
   switch (type) {
     case 'analysis':
       return `
-        Buoc 1: hay dua cho nguoi dung cac thong tin sau, khong them bot, ghi dung cau truc nhu sau
+      Tong hop cang chi tiet cang toi tu thong tin ben duoi, neu ro nguồn gốc phân tích (sao nào, cặp số nào).
+      Ưu tiên các sao có năng lượng cao (3-4) và các cặp số lặp lại, 3 so cuoi va cac cac sao di canh nhau.
+      Trả lời bằng tiếng Việt với các mục: Tính cách, Sự nghiệp, Tiền tài, Đầu tư/Rủi ro, Gia đình/Tình cảm, Bạn bè/Quý nhân, Sức khỏe.
         
         # THÔNG TIN CHI TIẾT VỀ CÁC SAO
         ${data.starSequence.map(star => 
@@ -95,7 +97,8 @@ const generatePrompt = (type, data) => {
         6. Bạn bè/Quý nhân
         7. Sức khỏe
         
-        Ưu tiên tổng hợp từ các sao năng lượng cao (3-4) và các khẳng định lặp lại nhiều lần. Thứ tự ưu tiên: 3 số cuối, các sao năng lượng cao (3,4), các combination, giải thích lặp lại nhiều, các vị trí đặc biệt.
+        Ưu tiên tổng hợp từ các sao năng lượng cao (3-4) và các khẳng định lặp lại nhiều lần. Thứ tự ưu tiên: 3 số cuối, các sao năng lượng cao (3,4), các combination, giải thích lặp lại nhiều, các vị trí đặc biệt. 
+        Luu y sao Hung khong phai hoan toan la xau, hay phan tich theo ca hai chieu. Neu cac sao Hung di sat nhau thi cac diem xau se the hien nhieu hon giong nhu co so 0 
       `;
       
     case 'question':
