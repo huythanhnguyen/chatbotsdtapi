@@ -15,7 +15,7 @@ const config = {
   MAX_TOKENS: 8192,
   REQUEST_TIMEOUT: 30000,
   CACHE_ENABLED: true,
-  CACHE_DURATION: 24 * 60 * 60 * 1000,
+  CACHE_DURATION: 30* 24 * 60 * 60 * 1000,
   DEBUG: process.env.NODE_ENV === 'development'
 };
 
@@ -32,6 +32,7 @@ const getSystemPrompt = () => `
   Tong hop tu phan tich thong tin ben duoi, neu ro nguồn gốc phân tích (sao nào, cặp số nào).
   Ưu tiên các sao có năng lượng cao (3-4) và các cặp số lặp lại, 3 so cuoi va cac cac sao di canh nhau.
   Trả lời bằng tiếng Việt với các mục: Tính cách, Sự nghiệp, Tiền tài, Đầu tư/Rủi ro, Gia đình/Tình cảm, Bạn bè/Quý nhân, Sức khỏe.
+  Khong them cac phan luu y ve luan giai phuong phap hay khuyen cao chung chung
 `;
 
 /**
@@ -44,15 +45,46 @@ const generatePrompt = (type, data) => {
   switch (type) {
     case 'analysis':
       return `
-      Tong hop cang chi tiet cang toi tu thong tin ben duoi, neu ro nguồn gốc phân tích (sao nào, cặp số nào).
-      Ưu tiên các sao có năng lượng cao (3-4) và các cặp số lặp lại, 3 so cuoi va cac cac sao di canh nhau.
-      Trả lời bằng tiếng Việt với các mục: Tính cách, Sự nghiệp, Tiền tài, Đầu tư/Rủi ro, Gia đình/Tình cảm, Bạn bè/Quý nhân, Sức khỏe.
+        day la phan tich luan giai ve so dien thoai ${data.phoneNumber}.
         
+        Hãy tổng hợp và giải thích ý nghĩa theo các thong tin ben duoi. Viet de co 1 bai tong hop co dien giai thong nhat ( khong doi nghich nhau) theo rule nhu sau:
+        
+        Ưu tiên các sao năng lượng cao (3-4) và các khẳng định lặp lại nhiều lần. Thứ tự ưu tiên: 3 số cuối, các sao năng lượng cao (3,4), các combination cos nang luong >3, giải thích lặp lại nhiều, các vị trí đặc biệt. 
+        Luu y sao Hung khong phai hoan toan la xau, hay phan tich theo ca hai chieu. Neu cac sao Hung di sat nhau thi cac diem xau se the hien nhieu hon giong nhu co so 0 
+        Cac y trai nguoc se duoc ghi vao 1 phan  luu y rieng (8)
+        Dien giai mot cach gan gui  dễ hiểu, với các phần sau, luu y tat ca viet thanh 1 doan van lien mach, khong de kieu gach dau dong
+        Mỗi giải thích kèm theo nguon goc, kem theo muc nang luong.
+       
+        Tong quat
+        1. Tính cách
+        2. Sự nghiệp
+        3. Tiền tài
+        4. Đầu tư và rủi ro
+        5. Gia đình/Tình cảm
+        6. Bạn bè/Quý nhân
+        7. Sức khỏe
+        8- Luu y 
+        
+
         # THÔNG TIN CHI TIẾT VỀ CÁC SAO
         ${data.starSequence.map(star => 
           `- ${star.originalPair}: ${star.name} (${star.nature}, Năng lượng: ${star.energyLevel || 0}/4)
           Ý nghĩa: ${star.detailedDescription || "Không có mô tả"}`
         ).join('\n\n')}
+        
+        # TỔ HỢP CÁC SAO LIỀN KỀ
+        ${data.starCombinations && data.starCombinations.length > 0 ?
+          data.starCombinations.map(combo => 
+            `- ${combo.firstStar.name} (${combo.firstStar.originalPair}) + ${combo.secondStar.name} (${combo.secondStar.originalPair}) [Năng lượng: ${combo.totalEnergy || 0}/8]
+            Tính chất: ${combo.isPositive ? "Tích cực" : (combo.isNegative ? "Tiêu cực" : "Trung tính")}
+            ${combo.isLastPair ? "**CẶP SAO CUỐI CÙNG - RẤT QUAN TRỌNG**" : ""}
+            Ý nghĩa: ${combo.description || "Không có mô tả"}
+            ${combo.detailedDescription && combo.detailedDescription.length > 0 ? 
+              `Chi tiết: ${Array.isArray(combo.detailedDescription) ? 
+                combo.detailedDescription.join(' ') : 
+                combo.detailedDescription}` : ""}`
+          ).join('\n\n')
+          : "Không có tổ hợp sao liền kề đáng chú ý."}
         
         # TỔ HỢP SỐ ĐẶC BIỆT
         ${data.keyCombinations && data.keyCombinations.length > 0 ? 
@@ -67,7 +99,7 @@ const generatePrompt = (type, data) => {
             `- ${warning.combination}: ${warning.description || "Không có mô tả"}`
           ).join('\n')
           : "Không có cảnh báo đặc biệt."}
-        
+
         # PHÂN TÍCH VỊ TRÍ SỐ ĐẶC BIỆT
         ${data.keyPositions ? 
           `- Số cuối: ${data.keyPositions.lastDigit.value} - ${data.keyPositions.lastDigit.meaning || "Không có ý nghĩa"}`
@@ -86,20 +118,8 @@ const generatePrompt = (type, data) => {
           - Tính chất: ${data.last3DigitsAnalysis.firstPair?.starInfo?.nature || "Không xác định"}`
           : "Không có phân tích 3 số cuối."}
          
-        Sau do, Hãy tổng hợp và giải thích ý nghĩa theo các luận giải sau đây về số điện thoại ${data.phoneNumber}.
-        Mỗi giải thích kèm theo star hoặc number hoặc combo là reason.
-        Tổng hợp thành câu trả lời toàn diện, chuyên nghiệp nhưng dễ hiểu, với các phần:
-        1. Tính cách
-        2. Sự nghiệp
-        3. Tiền tài
-        4. Đầu tư và rủi ro
-        5. Gia đình/Tình cảm
-        6. Bạn bè/Quý nhân
-        7. Sức khỏe
-        
-        Ưu tiên tổng hợp từ các sao năng lượng cao (3-4) và các khẳng định lặp lại nhiều lần. Thứ tự ưu tiên: 3 số cuối, các sao năng lượng cao (3,4), các combination, giải thích lặp lại nhiều, các vị trí đặc biệt. 
-        Luu y sao Hung khong phai hoan toan la xau, hay phan tich theo ca hai chieu. Neu cac sao Hung di sat nhau thi cac diem xau se the hien nhieu hon giong nhu co so 0 
-      `;
+
+              `;
       
     case 'question':
       const formattedPhone = data.analysisContext?.phoneNumber?.replace(/(\d{4})(\d{3})(\d{3})/, '$1 $2 $3') || '';
@@ -192,8 +212,11 @@ const generatePrompt = (type, data) => {
         
         Cuối cùng, cho biết số nào phù hợp nhất cho mỗi khía cạnh và số nào tốt nhất nói chung.
       `;
-      
-      return prompt;
+        // Log prompt được tạo ra
+    console.log('\n========= GENERATED PROMPT =========');
+    console.log(prompt);
+    console.log('===================================\n');
+        return prompt;
       
     case 'general':
       return `
@@ -345,10 +368,13 @@ const callGeminiAPI = async (prompt, options = {}) => {
       };
       
       if (config.DEBUG) {
-        console.log(`Gemini API call - attempt ${attempt}`);
+        // Hiển thị thông tin chi tiết về prompt
+        console.log(`\n=============== GEMINI API CALL - ATTEMPT ${attempt} ===============`);
         console.log(`Prompt length: ${prompt.length} characters`);
-        console.log(`Using history: ${useHistory}, History length: ${useHistory && userId ? (conversationManager.get(userId).length / 2) : 0} turns`);
-      }
+        console.log(`Using history: ${useHistory}, History length: ${useHistory && userId ? (getConversationHistory(userId).length / 2) : 0} turns`);
+        console.log(`\n=============== PROMPT CONTENT ===============`);
+        console.log(prompt); // Hiển thị toàn bộ nội dung prompt
+        console.log(`\n=============== END PROMPT CONTENT ===============\n`);      }
       
       const response = await axios.post(apiUrl, requestBody, {
         headers: { 'Content-Type': 'application/json' },
