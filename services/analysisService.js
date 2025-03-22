@@ -646,7 +646,7 @@ exports.getStarCombination = (star1, star2) => {
             key: comboKey,
             name: `${BAT_TINH[star1].name} + ${BAT_TINH[star2].name}`,
             description: combo.description,
-            meanings: [combo.description]
+            detailedDescription: [combo.detailedDescription]
         };
     }
     
@@ -657,7 +657,7 @@ exports.getStarCombination = (star1, star2) => {
                 key: comboKey,
                 name: `${BAT_TINH[star1].name} + ${BAT_TINH[star2].name}`,
                 description: combo.description,
-                meanings: combo.detailedDescription || []
+                detailedDescription: combo.detailedDescription || [] // Thay meanings thành detailedDescription
             };
         }
     }
@@ -669,7 +669,7 @@ exports.getStarCombination = (star1, star2) => {
         key: comboKey,
         name: `${BAT_TINH[star1].name} + ${BAT_TINH[star2].name}`,
         description: `Tổ hợp của ${BAT_TINH[star1].name} và ${BAT_TINH[star2].name}`,
-        meanings: [interpretation]
+        detailedDescription: [interpretation] // Thay meanings thành detailedDescription
     };
 };
 
@@ -698,6 +698,63 @@ exports.interpretStarCombination = (star1, star2) => {
         return `Tổ hợp cân bằng giữa sao tốt và sao xấu: ${BAT_TINH[star1].name} và ${BAT_TINH[star2].name} tạo ra sự cân bằng giữa thuận lợi và khó khăn.`;
     }
 };
+/**
+ * Phân tích tổ hợp giữa các sao liền kề trong chuỗi sao
+ * @param {Array} starSequence - Mảng các đối tượng sao đã phân tích
+ * @returns {Array} Mảng các tổ hợp sao liền kề và ý nghĩa
+ */
+exports.analyzeConsecutivePairCombinations = (starSequence) => {
+    const combinations = [];
+    
+    // Xử lý từng cặp sao liền kề
+    for (let i = 0; i < starSequence.length - 1; i++) {
+      const currentStar = starSequence[i];
+      const nextStar = starSequence[i + 1];
+      
+      // Bỏ qua nếu một trong hai sao là UNKNOWN
+      if (currentStar.star === "UNKNOWN" || nextStar.star === "UNKNOWN") {
+        continue;
+      }
+      
+      // Sử dụng hàm getStarCombination hiện có để lấy thông tin tổ hợp
+      const combination = this.getStarCombination(currentStar.star, nextStar.star);
+      
+      if (combination) {
+        // Thêm thông tin về tổng năng lượng của cặp sao
+        const totalEnergy = currentStar.energyLevel + nextStar.energyLevel;
+        const isPositive = (currentStar.nature === "Cát" && nextStar.nature === "Cát");
+        const isNegative = (currentStar.nature === "Hung" && nextStar.nature === "Hung");
+        
+        // Kiểm tra xem đây có phải là cặp cuối cùng không
+        const isLastPair = (i === starSequence.length - 2);
+        
+        combinations.push({
+          firstStar: {
+            name: currentStar.name,
+            nature: currentStar.nature,
+            originalPair: currentStar.originalPair,
+            energyLevel: currentStar.energyLevel
+          },
+          secondStar: {
+            name: nextStar.name,
+            nature: nextStar.nature,
+            originalPair: nextStar.originalPair,
+            energyLevel: nextStar.energyLevel
+          },
+          key: combination.key,
+          description: combination.description,
+          detailedDescription: combination.detailedDescription || [], 
+          totalEnergy: totalEnergy,
+          isPositive: isPositive,
+          isNegative: isNegative,
+          position: `${i+1}-${i+2}`, // Vị trí trong chuỗi sao
+          isLastPair: isLastPair // Đánh dấu nếu là cặp cuối cùng
+        });
+      }
+    }
+    
+    return combinations;
+  };
 
 /**
  * Identify dangerous combinations
@@ -907,7 +964,7 @@ exports.checkDangerousCombinations = (phoneNumber) => {
                 combination: triplet,
                 position: `${i+1}-${i+3}`,
                 description: "Lục Sát + Ngũ Quỷ: dễ có duyên với người khác phái, nát Đào Hoa",
-                meanings: "Đào hoa nát, tình cảm không ổn định, có thể có nhiều mối quan hệ phức tạp."
+                detailedDescription: "Đào hoa nát, tình cảm không ổn định, có thể có nhiều mối quan hệ phức tạp."
             });
         }
         
@@ -918,7 +975,7 @@ exports.checkDangerousCombinations = (phoneNumber) => {
                 combination: triplet,
                 position: `${i+1}-${i+3}`,
                 description: "Tuyệt mệnh + Ngũ quỷ: dễ dẫn phát sức khỏe kém, ung thư, bệnh nan y",
-                meanings: "Rủi ro sức khỏe cao, cần chú ý đến các vấn đề về tim mạch và các bệnh mạn tính."
+                detailedDescription: "Rủi ro sức khỏe cao, cần chú ý đến các vấn đề về tim mạch và các bệnh mạn tính."
             });
         }
         
@@ -929,7 +986,7 @@ exports.checkDangerousCombinations = (phoneNumber) => {
                 combination: triplet,
                 position: `${i+1}-${i+3}`,
                 description: "Tình cảm ngầm: xuất hiện tình cảm ngầm, tình ngoài giá thú, tình tay ba",
-                meanings: "Có nguy cơ tình cảm phức tạp, quan hệ ngoài luồng, dễ gây đổ vỡ gia đình."
+                detailedDescription: "Có nguy cơ tình cảm phức tạp, quan hệ ngoài luồng, dễ gây đổ vỡ gia đình."
             });
         }
         
@@ -944,7 +1001,7 @@ exports.checkDangerousCombinations = (phoneNumber) => {
                         combination: triplet,
                         position: `${i+1}-${i+3}`,
                         description: combo.description,
-                        meanings: Array.isArray(combo.detailedDescription) ? 
+                        detailedDescription: Array.isArray(combo.detailedDescription) ? 
                                   combo.detailedDescription.join(" ") : combo.detailedDescription
                     });
                 }
@@ -964,29 +1021,29 @@ exports.checkDangerousCombinations = (phoneNumber) => {
                 combination: pair,
                 position: `${i+1}-${i+2}`,
                 description: "19/91: Không thích hợp nữ nhân dùng, dễ trở thành nữ cường nhân",
-                meanings: "Phụ nữ sẽ có cá tính mạnh, cứng rắn, thiên về công việc, có thể bỏ bê gia đình."
+                detailedDescription: "Phụ nữ sẽ có cá tính mạnh, cứng rắn, thiên về công việc, có thể bỏ bê gia đình."
             });
         }
     }
     
     // Check for too many 0s
     const zeroCount = digits.filter(d => d === '0').length;
-    if (zeroCount > 2) {
+    if (zeroCount >= 2) {
         dangerousCombinations.push({
             combination: "0 (xuất hiện " + zeroCount + " lần)",
             position: "Nhiều vị trí",
             description: "Quá nhiều số 0: hao tổn tiết nguyên khí, sức khỏe dễ mệt nhọc",
-            meanings: "Năng lượng suy giảm, thể trạng dễ mệt mỏi, công việc đầu tư nhiều nhưng hiệu quả thấp."
+            detailedDescription: "Năng lượng suy giảm, thể trạng dễ mệt mỏi, công việc đầu tư nhiều nhưng hiệu quả thấp."
         });
     }
     
-    // Check if last digit is 0
-    if (digits[digits.length - 1] === '0') {
+    // Check if last digit is 0 or 5
+    if (digits[digits.length - 1] === '0' || digits[digits.length - 1] === '5') {
         dangerousCombinations.push({
             combination: digits[digits.length - 1],
             position: "Cuối",
-            description: "Số đuôi 0: tứ đại giai không, cuối cùng là không",
-            meanings: "Mọi nỗ lực cuối cùng có thể không mang lại kết quả như mong đợi, dễ trống rỗng."
+            description: "Số đuôi 0/5: tứ đại giai không, cuối cùng là không",
+            detailedDescription: "Mọi nỗ lực cuối cùng có thể không mang lại kết quả như mong đợi, dễ trống rỗng."
         });
     }
     
@@ -1280,7 +1337,7 @@ exports.analyzePhoneNumber = (phoneNumber, userContext = {}) => {
     // Check for effects of 0 and 5
     const specialDigitEffects = this.analyzeSpecialDigits(cleanNumber);
     
-    // Create base analysis result
+   // Tạo base analysis result
     const analysisResult = {
         phoneNumber: cleanNumber,
         normalizedNumber: normalizedNumber,
@@ -1302,6 +1359,9 @@ exports.analyzePhoneNumber = (phoneNumber, userContext = {}) => {
         energyModifier: batTinhResult.energyModifier,
         qualityScore: 0 // Will calculate below
     };
+    
+    // Thêm phân tích về tổ hợp cặp sao liền kề
+    analysisResult.starCombinations = this.analyzeConsecutivePairCombinations(starSequence);
     
     // Calculate quality score
     analysisResult.qualityScore = this.calculateQualityScore(analysisResult);
