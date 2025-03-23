@@ -16,6 +16,7 @@ const analysisSchema = new mongoose.Schema({
     starSequence: Array,
     energyLevel: Object,
     balance: String,
+    starCombinations: Array,
     keyCombinations: Array,
     dangerousCombinations: Array,
     keyPositions: Object,
