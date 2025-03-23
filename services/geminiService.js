@@ -28,11 +28,12 @@ const MAX_CONVERSATION_TURNS = 10;
  * Base system prompt for all requests
  */
 const getSystemPrompt = () => `
-  Hãy đóng vai một nhà chiêm tinh phân tích số điện thoại dựa trên phương pháp Tứ Cát Tứ Hung (Bát Tinh).
-  Tong hop tu phan tich thong tin ben duoi, neu ro nguồn gốc phân tích (sao nào, cặp số nào).
-  Ưu tiên các sao có năng lượng cao (3-4) và các cặp số lặp lại, 3 so cuoi va cac cac sao di canh nhau.
-  Trả lời bằng tiếng Việt với các mục: Tính cách, Sự nghiệp, Tiền tài, Đầu tư/Rủi ro, Gia đình/Tình cảm, Bạn bè/Quý nhân, Sức khỏe.
-  Khong them cac phan luu y ve luan giai phuong phap hay khuyen cao chung chung
+  Hãy đóng vai một nhà chiêm tinh phân tích số điện thoại dựa trên phương pháp Bát Tinh. Dien dat lien mach, ngan gon.
+        Ưu tiên các sao năng lượng cao (3-4) và các khẳng định lặp lại nhiều lần. Thứ tự ưu tiên: 3 số cuối, các sao năng lượng cao (3,4), các combination cos nang luong >3, giải thích lặp lại nhiều, các vị trí đặc biệt. 
+        Luu y sao Hung khong phai hoan toan la xau, hay phan tich theo ca hai chieu. Neu cac sao Hung di sat nhau thi cac diem xau se the hien nhieu hon giong nhu co so 0 
+        Cac y trai nguoc se duoc ghi vao 1 phan  luu y rieng (8)
+        Dien giai mot cach gan gui  dễ hiểu, với các phần sau, luu y tat ca viet thanh 1 doan van lien mach, khong de kieu gach dau dong
+        Mỗi giải thích kèm theo nguon goc, kem theo muc nang luong.
 `;
 
 /**
@@ -47,7 +48,7 @@ const generatePrompt = (type, data) => {
       return `
         day la phan tich luan giai ve so dien thoai ${data.phoneNumber}.
         
-        Hãy tổng hợp và giải thích ý nghĩa theo các thong tin ben duoi. Viet de co 1 bai tong hop co dien giai thong nhat ( khong doi nghich nhau) theo rule nhu sau:
+        Hãy tổng hợp và giải thích ý nghĩa theo các thong tin ben duoi. Dien dat lien mach, ngan gon. Viet de co 1 bai tong hop co dien giai thong nhat ( khong doi nghich nhau) theo rule nhu sau:
         
         Ưu tiên các sao năng lượng cao (3-4) và các khẳng định lặp lại nhiều lần. Thứ tự ưu tiên: 3 số cuối, các sao năng lượng cao (3,4), các combination cos nang luong >3, giải thích lặp lại nhiều, các vị trí đặc biệt. 
         Luu y sao Hung khong phai hoan toan la xau, hay phan tich theo ca hai chieu. Neu cac sao Hung di sat nhau thi cac diem xau se the hien nhieu hon giong nhu co so 0 
