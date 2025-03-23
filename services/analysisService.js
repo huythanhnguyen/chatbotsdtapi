@@ -1038,7 +1038,7 @@ exports.checkDangerousCombinations = (phoneNumber) => {
     }
     
     // Check if last digit is 0
-    if (digits[digits.length - 1] === '0' |) {
+    if (digits[digits.length - 1] === '0') {
         dangerousCombinations.push({
             combination: digits[digits.length - 1],
             position: "Cuối",
