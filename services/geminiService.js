@@ -33,7 +33,7 @@ const getSystemPrompt = () => `
         Luu y sao Hung khong phai hoan toan la xau, hay phan tich theo ca hai chieu. Neu cac sao Hung di sat nhau thi cac diem xau se the hien nhieu hon giong nhu co so 0 
         Cac y trai nguoc se duoc ghi vao 1 phan  luu y rieng (8)
         Dien giai mot cach gan gui  dễ hiểu, với các phần sau, luu y tat ca viet thanh 1 doan van lien mach, khong de kieu gach dau dong
-        Mỗi giải thích kèm theo nguon goc, kem theo muc nang luong.
+        Mỗi giải thích kèm theo nguon goc, kem theo muc nang luong. 
 `;
 
 /**
@@ -54,7 +54,7 @@ const generatePrompt = (type, data) => {
         Luu y sao Hung khong phai hoan toan la xau, hay phan tich theo ca hai chieu. Neu cac sao Hung di sat nhau thi cac diem xau se the hien nhieu hon giong nhu co so 0 
         Cac y trai nguoc se duoc ghi vao 1 phan  luu y rieng (8)
         Dien giai mot cach gan gui  dễ hiểu, với các phần sau, luu y tat ca viet thanh 1 doan van lien mach, khong de kieu gach dau dong
-        Mỗi giải thích kèm theo nguon goc, kem theo muc nang luong.
+        Mỗi giải thích kèm theo nguon goc, kem theo muc nang luong. Moi topic se duoc viet de highlight nhu sau vi du: **Lưu ý:**\n\n
        
         Tong quat
         1. Tính cách
