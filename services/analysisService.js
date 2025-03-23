@@ -1027,7 +1027,7 @@ exports.checkDangerousCombinations = (phoneNumber) => {
     }
     
     // Check for too many 0s
-    const zeroCount = digits.filter(d => d === '0').length;
+    const zeroCount = digits.filter(d => d === '0').length-1;
     if (zeroCount >= 2) {
         dangerousCombinations.push({
             combination: "0 (xuất hiện " + zeroCount + " lần)",
@@ -1037,12 +1037,12 @@ exports.checkDangerousCombinations = (phoneNumber) => {
         });
     }
     
-    // Check if last digit is 0 or 5
-    if (digits[digits.length - 1] === '0' || digits[digits.length - 1] === '5') {
+    // Check if last digit is 0
+    if (digits[digits.length - 1] === '0' |) {
         dangerousCombinations.push({
             combination: digits[digits.length - 1],
             position: "Cuối",
-            description: "Số đuôi 0/5: tứ đại giai không, cuối cùng là không",
+            description: "Số đuôi 0: tứ đại giai không, cuối cùng là không",
             detailedDescription: "Mọi nỗ lực cuối cùng có thể không mang lại kết quả như mong đợi, dễ trống rỗng."
         });
     }
