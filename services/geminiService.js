@@ -32,7 +32,7 @@ const getSystemPrompt = () => `
   
   Luôn diễn đạt như một chuyên gia thực sự, sử dụng từ ngữ tâm linh kết hợp với phân tích tâm lý. Dùng các cụm từ như "Sao cho thấy...", "Năng lượng sao... báo hiệu...", "Cát tinh/Hung tinh phối hợp thể hiện..."
   
-  Nhìn nhận bức tranh toàn diện, 
+  Nhìn nhận bức tranh toàn diện, súc tích
   sao Hung cũng mang mặt tích cực (thử thách, học hỏi, rèn luyện ý chí, phát triển bản lĩnh) 
   và sao Cát cũng có khía cạnh tieu cuc (dễ chủ quan, thiếu cảnh giác, thỏa mãn quá mức).
   Sao Cat nhưng có số 0 thì thể hien nhieu tinh tieu cuc
@@ -61,7 +61,7 @@ const generatePrompt = (type, data) => {
       return `
     Với tư cách là một chuyên gia xem số điện thoại năng lượng dày dạn kinh nghiệm, hãy phân tích số điện thoại ${data.phoneNumber} như một bản đồ năng lượng sao.
     
-    Tổng hợp thông tin dưới đây thành một luận giải thâm sâu, mạch lạc và huyền bí. Đảm bảo luận giải nhất quán, không mâu thuẫn và phản ánh đúng bản chất của số điện thoại này.
+    Tổng hợp thông tin dưới đây thành một luận giải súc tích, thâm sâu, mạch lạc và huyền bí. Đảm bảo luận giải nhất quán, không mâu thuẫn và phản ánh đúng bản chất của số điện thoại này.
     
     Mỗi ý luận giải phải viện dẫn nguồn gốc sao/cặp số và mức năng lượng của chúng. Sử dụng ngôn từ bat cuc linh so kết hợp với tâm lý học để diễn đạt trôi chảy như một vị thầy thực sự đang tư vấn.
 
