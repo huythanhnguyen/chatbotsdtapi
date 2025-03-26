@@ -85,7 +85,7 @@ const generatePrompt = (type, data) => {
     **5. Gia đình và Tình duyên**: Mối quan hệ tình cảm, gia đình, kết nối với người thân
     **6. Nhân duyên và Quý nhân**: Mối quan hệ xã hội, người trợ giúp, cách kết nối
     **7. Sức khỏe và Năng lượng sống**: Điểm cần chú ý về sức khỏe
-    **8. Điểm lưu ý đặc biệt**: Những mâu thuẫn hoặc cạm bẫy cần tránh, lời khuyên bổ sung
+    **8. Điểm lưu ý đặc biệt**: những vấn đề khác và  lời khuyên bổ sung
     
         
 
