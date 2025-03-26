@@ -47,7 +47,7 @@ const getSystemPrompt = () => `
   4. Các tổ hợp có năng lượng >3
   5. Vị trí số đặc biệt
   
-  Diễn đạt liên mạch, súc tích, có câu chuyện xuyên suốt, khen truoc roi moi che sau. Mỗi giải thích phải kèm nguồn gốc (sao nào, cặp số nào) và mức năng lượng.Khong noi chuyen vong vo nuoc doi. `;
+  Diễn đạt liên mạch, súc tích, có câu chuyện xuyên suốt, không tự mâu thuẫn, khen truoc roi moi che sau. Mỗi giải thích phải kèm nguồn gốc (sao nào, cặp số nào) và mức năng lượng.Khong noi chuyen vong vo nuoc doi. `;
  
 /**
  * Generate prompt based on context and query type
