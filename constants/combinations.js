@@ -279,7 +279,14 @@ const COMBINATION_INTERPRETATIONS = {
             },
             "NGU_QUY_NGU_QUY": {
                 stars: ["NGU_QUY", "NGU_QUY"],
-                description: ""
+                description: "rất thông minh, tài giỏi và dễ đạt thành tựu trong công việc, không ổn định nhất , phản ứng nhanh lại gặp khó khăn trắc trở , không ổn định , ý nghĩ hay thay đổi ",
+                detailedDescription:[
+                    "Họ có khả năng suy nghĩ tốt và thường đưa ra những ý kiến giá trị, giúp ích cho sự nghiệp.",
+                    "Tuy nhiên, họ không phải là người điềm tĩnh và dễ bất mãn nếu không có cơ hội phát triển.",
+                    "luôn hướng đến những mục tiêu và lý tưởng cao hơn, không thích sự trì trệ",
+                    "Trong tình yêu, họ có xu hướng chủ động kết thúc mối quan hệ.",
+                    "Tổ hợp này liên quan đến sự thay đổi, nhiều ý tưởng, thức khuya và các vấn đề về tim mạch, mạch máu não."
+                ]
             },
             "NGU_QUY_TUYET_MENH": {
                 stars: ["NGU_QUY", "TUYET_MENH"],
