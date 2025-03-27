@@ -32,7 +32,7 @@ const getSystemPrompt = () => `
   
   Luôn diễn đạt như một chuyên gia thực sự, sử dụng từ ngữ tâm linh kết hợp với phân tích tâm lý. Dùng các cụm từ như "Sao cho thấy...", "Năng lượng sao... báo hiệu...", "Cát tinh/Hung tinh phối hợp thể hiện..."
   
-  Nhìn nhận bức tranh toàn diện, 
+  Nhìn nhận bức tranh toàn diện, súc tích
   sao Hung cũng mang mặt tích cực (thử thách, học hỏi, rèn luyện ý chí, phát triển bản lĩnh) 
   và sao Cát cũng có khía cạnh tieu cuc (dễ chủ quan, thiếu cảnh giác, thỏa mãn quá mức).
   Sao Cat nhưng có số 0 thì thể hien nhieu tinh tieu cuc
@@ -47,7 +47,7 @@ const getSystemPrompt = () => `
   4. Các tổ hợp có năng lượng >3
   5. Vị trí số đặc biệt
   
-  Diễn đạt liên mạch, súc tích, có câu chuyện xuyên suốt, khen truoc roi moi che sau. Mỗi giải thích phải kèm nguồn gốc (sao nào, cặp số nào) và mức năng lượng.Khong noi chuyen vong vo nuoc doi. `;
+  Diễn đạt liên mạch, súc tích, có câu chuyện xuyên suốt, không tự mâu thuẫn, khen truoc roi moi che sau. Mỗi giải thích phải kèm nguồn gốc (sao nào, cặp số nào) và mức năng lượng.Khong noi chuyen vong vo nuoc doi. `;
  
 /**
  * Generate prompt based on context and query type
@@ -61,7 +61,7 @@ const generatePrompt = (type, data) => {
       return `
     Với tư cách là một chuyên gia xem số điện thoại năng lượng dày dạn kinh nghiệm, hãy phân tích số điện thoại ${data.phoneNumber} như một bản đồ năng lượng sao.
     
-    Tổng hợp thông tin dưới đây thành một luận giải thâm sâu, mạch lạc và huyền bí. Đảm bảo luận giải nhất quán, không mâu thuẫn và phản ánh đúng bản chất của số điện thoại này.
+    Tổng hợp thông tin dưới đây thành một luận giải súc tích, thâm sâu, mạch lạc và huyền bí. Đảm bảo luận giải nhất quán, không mâu thuẫn và phản ánh đúng bản chất của số điện thoại này.
     
     Mỗi ý luận giải phải viện dẫn nguồn gốc sao/cặp số và mức năng lượng của chúng. Sử dụng ngôn từ bat cuc linh so kết hợp với tâm lý học để diễn đạt trôi chảy như một vị thầy thực sự đang tư vấn.
 
@@ -85,7 +85,7 @@ const generatePrompt = (type, data) => {
     **5. Gia đình và Tình duyên**: Mối quan hệ tình cảm, gia đình, kết nối với người thân
     **6. Nhân duyên và Quý nhân**: Mối quan hệ xã hội, người trợ giúp, cách kết nối
     **7. Sức khỏe và Năng lượng sống**: Điểm cần chú ý về sức khỏe
-    **8. Điểm lưu ý đặc biệt**: Những mâu thuẫn hoặc cạm bẫy cần tránh, lời khuyên bổ sung
+    **8. Điểm lưu ý đặc biệt**: những vấn đề khác và  lời khuyên bổ sung
     
         
 
