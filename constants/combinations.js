@@ -5,46 +5,60 @@ const COMBINATION_INTERPRETATIONS = {
             // Sinh Khí với các sao khác
             "SINH_KHI_SINH_KHI": {
                 stars: ["SINH_KHI", "SINH_KHI"],
-                description: ""
+                description: "tập hợp tăng cường năng lượng quý nhân",
+                detailedDescription: [
+                    "Thường lạc quan, cởi mở, linh hoạt và dễ kết bạn.",
+                    "Nhận được sự giúp đỡ khi gặp khó khăn, được nhiều người mong muốn vì sự tích cực, dễ hòa đồng và mang lại điều tốt đẹp cho người xung",
+                    "lý trí, khách quan và bình tĩnh trong hành động.",
+                    "Quá nhiều năng lượng Sinh Khí có thể dẫn đến thiếu quyết đoán, động lực và gây ra sự lười biếng.",
+                ],
             },
             "SINH_KHI_THIEN_Y": {
                 stars: ["SINH_KHI", "THIEN_Y"],
                 description: "Quý nhân trợ giúp, tài lộc hanh thông, được người khác quý mến và giúp đỡ.",
                 detailedDescription: [
-                    "ThiênY tượng trưng cho nguồn tiên, Sinh Khí cũng có nghĩa là Quý nhân",
+                    "Thiên Y tượng trưng cho nguồn tiên, Sinh Khí cũng có nghĩa là Quý nhân",
                     "nên có thể hiểu là Về mặt tài lộc thì có cao nhân giúp đỡ", 
                     "nên tổng số được Thiên Y và  Sinh Khí bảo vệ, bạn không cần phải lo lắng quá nhiều về tài lộc.",
                 ]
             },
             "SINH_KHI_DIEN_NIEN": {
                 stars: ["SINH_KHI", "DIEN_NIEN"], 
-                description: "Sự nghiệp vững chắc, có quý nhân dẫn dắt, công việc thuận lợi và phát triển."
+                description: "Sự nghiệp vững chắc, có quý nhân dẫn dắt, công việc thuận lợi và phát triển.",
             },
             "SINH_KHI_PHUC_VI": {
                 stars: ["SINH_KHI", "PHUC_VI"],
-                description: ""
+                description: "trí tuệ cảm xúc cao, sự nổi tiếng và lạc quan, cao thượng, thụ động, thận trọng và làm việc tỉ mỉ.",
+                detailedDescription:[
+                    " trí tuệ cảm xúc cao, sự nổi tiếng và lạc quan, cao thượng.",
+                    " Một nhược điểm là sự lười biếng của Sinh Khí có thể tăng lên khi Phục Vị mạnh, dẫn đến trì hoãn công việc.",
+                    "Điều này gây bất lợi cho những ai muốn khởi nghiệp hoặc thăng tiến do tính bảo thủ của Phục Vị.",
+                    "Về mặt tình cảm, họ kiên nhẫn và chậm rãi giải quyết các vấn đề.",
+                    "Đặc điểm của người có nhiều Phục Vị là bảo thủ, bướng bỉnh, thận trọng quá mức và ngại rủi ro.",
+                    "Trong sự nghiệp, họ thường chờ đợi thời cơ thích hợp thay vì chủ động.",
+                ],
             },
             "SINH_KHI_HOA_HAI": {
                 stars: ["SINH_KHI", "HOA_HAI"],
-                description: "Gặp quý nhân nhưng dễ mất tiền, thu nhập cao nhưng chi tiêu lớn."
+                description: "Gặp quý nhân nhưng dễ mất tiền, thu nhập cao nhưng chi tiêu lớn.",
             },
             "SINH_KHI_LUC_SAT": {
                 stars: ["SINH_KHI", "LUC_SAT"],
-                description: "Được giúp đỡ trong lĩnh vực dịch vụ, quan hệ xã hội tốt nhưng cẩn thận người không tốt."
+                description: "Được giúp đỡ trong lĩnh vực dịch vụ, quan hệ xã hội tốt nhưng cẩn thận người không tốt.",
             },
             "SINH_KHI_NGU_QUY": {
                 stars: ["SINH_KHI", "NGU_QUY"],
-                description: "Có quý nhân nhưng tư duy không ổn định, dễ thay đổi, nên cẩn trọng với quyết định."
+                description: "Có quý nhân nhưng tư duy không ổn định, dễ thay đổi, nên cẩn trọng với quyết định.",
             },
             "SINH_KHI_TUYET_MENH": {
                 stars: ["SINH_KHI", "TUYET_MENH"],
-                description: "Gặp quý nhân trong lúc khó khăn, được giúp đỡ nhưng phải nỗ lực nhiều."
+                description: "Gặp quý nhân trong lúc khó khăn, được giúp đỡ nhưng phải nỗ lực nhiều.",
             },
         
             // Thiên Y với các sao khác
             "THIEN_Y_SINH_KHI": {
                 stars: ["THIEN_Y", "SINH_KHI"],
-                description: "Quý nhân trợ giúp, tài lộc hanh thông, được người khác quý mến và giúp đỡ."
+                description: "Quý nhân trợ giúp, tài lộc hanh thông, được người khác quý mến và giúp đỡ.",
             },
             "THIEN_Y_THIEN_Y": {
                 stars: ["THIEN_Y", "THIEN_Y"],
@@ -62,23 +76,40 @@ const COMBINATION_INTERPRETATIONS = {
             },
             "THIEN_Y_DIEN_NIEN": {
                 stars: ["THIEN_Y", "DIEN_NIEN"],
-                description: "Tiền tài dồi dào, công việc ổn định, xây dựng được nguồn thu nhập bền vững."
+                description: "Tiền tài dồi dào, công việc ổn định, xây dựng được nguồn thu nhập bền vững.",
             },
             "THIEN_Y_PHUC_VI": {
                 stars: ["THIEN_Y", "PHUC_VI"],
-                description: ""
+                description: "nguồn tài lộc liên tục và sự tiếp nối của sự giàu có",
+                detailedDescription: [
+                    "Tổ hợp này thường dẫn đến việc tăng lương hoặc có thêm các nguồn thu nhập thụ động khác. ",
+                    " sự bất an của Phục Vị có thể hướng đến những khía cạnh khác nhau của Thiên Y, đặc biệt là về tài chính. ",
+                    "từ trường Thiên Y kết hợp Phục Vị có thể không giỏi quản lý tiền bạc và dễ lo lắng về tài chính, dù có xu hướng tiết kiệm. ",
+                    " Trong các mối quan hệ, họ thường lo lắng về sự được mất và đưa ra phán đoán dựa trên các yếu tố khác.",
+                    "Do cảm thấy bất an về mặt cảm xúc, thường giỏi nắm bắt chi tiết của đối phương và dễ hoảng sợ bởi những điều nhỏ nhặt, lo lắng về sự được mất.",
+                ]
             },
             "THIEN_Y_HOA_HAI": {
                 stars: ["THIEN_Y", "HOA_HAI"],
-                description: "Tài lộc tốt nhưng dễ hao tiền, mọi người thích giao du nhưng tốn kém."
+                description: "Tài lộc tốt nhưng dễ hao tiền, mọi người thích giao du nhưng tốn kém.",
             },
             "THIEN_Y_LUC_SAT": {
                 stars: ["THIEN_Y", "LUC_SAT"],
-                description: "Kiếm tiền tốt trong lĩnh vực dịch vụ, tình cảm tốt nhưng phải cẩn thận với mối quan hệ."
+                description: "Kiếm tiền tốt trong lĩnh vực dịch vụ, tình cảm tốt nhưng phải cẩn thận với mối quan hệ.",
+                detailedDescription: [
+                    "Đặc điểm chính của từ trường này là sự giàu có tích cực",
+                    "là người rộng lượng, không thù dai, có tư tưởng rộng rãi và sẽ không quan tâm những vấn đề tầm thường",
+                    "Trong giao tiếp giữa các cá nhân, dễ xúc động, quá tốt bụng nên dễ bị tổn thương;",
+                    "Không thiếu tiền nên không quan tâm đến tiền lắm, nếu không chú tâm sẽ bỏ lỡ cơ hội kiếm tiền.",
+                    "Người có từ trường Thiên Y giỏi quan hệ, đào hoa tích cực",
+                    "đường tình duyên của họ suôn sẻ hơn, gặp được bạn đời sẽ không khó, sẽ gặp được nhiều người phù hợp.",
+                    "Vì đặc điểm này của đào hoa mạnh mẽ, mọi mối quan hệ đều sẽ ngọt ngào và tươi đẹp",
+                    "nhưng cũng cần lưu ý không nên có nhiều từ trường Thiên Y trong dãy số, nếu không sẽ dễ xảy ra nhiều cuộc hôn nhân.",
+                ]
             },
             "THIEN_Y_NGU_QUY": {
                 stars: ["THIEN_Y", "NGU_QUY"],
-                description: "Có tài chính nhưng không ổn định, tư duy hay thay đổi, dễ đầu tư mạo hiểm."
+                description: "Có tài chính nhưng không ổn định, tư duy hay thay đổi, dễ đầu tư mạo hiểm.",
             },
             "THIEN_Y_TUYET_MENH": {
                 stars: ["THIEN_Y", "TUYET_MENH"],
@@ -100,7 +131,7 @@ const COMBINATION_INTERPRETATIONS = {
             },
             "DIEN_NIEN_PHUC_VI": {
                 stars: ["DIEN_NIEN", "PHUC_VI"],
-                description: ""
+                description: " sự mạnh mẽ trong công việc, khả năng thực hành tốt và kinh nghiệm dày dặn, giúp họ trở thành người dẫn dắt ý kiến trong lĩnh vực chuyên môn"
             },
             "DIEN_NIEN_HOA_HAI": {
                 stars: ["DIEN_NIEN", "HOA_HAI"],
