@@ -177,19 +177,19 @@ exports.askQuestion = async (req, res) => {
         console.log("Processing follow-up question");
         
         // Nếu cung cấp số điện thoại, tìm phân tích của số đó
-        let analysisRecord;
+        let followupRecord;
         
         if (phoneNumber) {
-          analysisRecord = await Analysis.findOne({ 
+          followupRecord = await Analysis.findOne({ 
             phoneNumber,
             userId
           }).sort({ createdAt: -1 });
         } else {
           // Nếu không cung cấp số, tìm phân tích gần nhất
-          analysisRecord = await Analysis.findOne({ userId }).sort({ createdAt: -1 });
+          followupRecord = await Analysis.findOne({ userId }).sort({ createdAt: -1 });
         }
         
-        if (!analysisRecord) {
+        if (!followupRecord) {
           console.log("No existing analysis found for follow-up");
           return res.status(404).json({
             success: false,
@@ -197,20 +197,20 @@ exports.askQuestion = async (req, res) => {
           });
         }
         
-        console.log(`Using existing analysis for phone ${analysisRecord.phoneNumber} for follow-up`);
+        console.log(`Using existing analysis for phone ${followupRecord.phoneNumber} for follow-up`);
         
         // Sử dụng phương thức follow-up response
         const followUpResponse = await geminiService.generateFollowUpResponse(
           question, 
           userId, 
-          analysisRecord.result
+          followupRecord.result
         );
         
         return res.status(200).json({
           success: true,
           analysis: {
             answer: followUpResponse,
-            phoneNumber: analysisRecord.phoneNumber,
+            phoneNumber: followupRecord.phoneNumber,
             question,
             type: 'followup'
           }
@@ -287,12 +287,12 @@ exports.askQuestion = async (req, res) => {
         }
         
         // Tìm phân tích cho số điện thoại cụ thể
-        const analysisRecord = await Analysis.findOne({ 
+        const existingAnalysisRecord = await Analysis.findOne({ 
           phoneNumber,
           userId
         }).sort({ createdAt: -1 });
         
-        if (!analysisRecord) {
+        if (!existingAnalysisRecord) {
           console.log(`No existing analysis found for phone ${phoneNumber}, creating new analysis`);
           // Thực hiện phân tích mới nếu không tìm thấy
           const analysisData = await analysisService.analyzePhoneNumber(phoneNumber);
@@ -324,8 +324,8 @@ exports.askQuestion = async (req, res) => {
         console.log(`Found existing analysis for phone ${phoneNumber}, generating response`);
         
         // Kiểm tra xem có thuộc tính result không
-        if (!analysisRecord.result) {
-          console.error("Analysis record is missing result property:", analysisRecord);
+        if (!existingAnalysisRecord.result) {
+          console.error("Analysis record is missing result property:", existingAnalysisRecord);
           return res.status(500).json({
             success: false,
             message: 'Lỗi: Dữ liệu phân tích thiếu thông tin cần thiết'
@@ -333,7 +333,7 @@ exports.askQuestion = async (req, res) => {
         }
         
         // Sử dụng GeminiService để tạo phản hồi
-        const questionResponse = await geminiService.generateResponse(question, analysisRecord.result, userId);
+        const questionResponse = await geminiService.generateResponse(question, existingAnalysisRecord.result, userId);
         
         // Trả về kết quả
         return res.status(200).json({
