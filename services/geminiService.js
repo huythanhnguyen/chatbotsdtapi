@@ -317,7 +317,7 @@ exports.handleUserMessage = async (message, userId = null) => {
             
             // Tạo phân tích chi tiết
             console.log("Generating analysis via generateAnalysis()");
-            response = await this.generateAnalysis(analysisData, userId);
+            response = await exports.generateAnalysis(analysisData, userId);
             console.log(`Generated analysis in ${Date.now() - startTime}ms, length: ${response.length}`);
           } catch (analysisError) {
             console.error("Error during phone analysis:", analysisError);
@@ -355,7 +355,7 @@ exports.handleUserMessage = async (message, userId = null) => {
             
             // Tạo phân tích so sánh
             console.log("Generating comparison analysis");
-            response = await this.generateComparison(analysisDataList, userId);
+            response = await exports.generateComparison(analysisDataList, userId);
             console.log(`Generated comparison, response length: ${response.length}`);
           } catch (error) {
             console.error("Error during comparison:", error);
@@ -379,7 +379,7 @@ exports.handleUserMessage = async (message, userId = null) => {
             console.log(`Found context for phone ${phoneContext.phoneNumber}`);
             // Có ngữ cảnh về số điện thoại -> xử lý follow-up
             try {
-              response = await this.generateFollowUpResponse(analysis.mainQuestion, userId, phoneContext.analysisData);
+              response = await exports.generateFollowUpResponse(analysis.mainQuestion, userId, phoneContext.analysisData);
               console.log(`Generated follow-up response, length: ${response.length}`);
             } catch (error) {
               console.error("Error generating follow-up response:", error);
@@ -390,7 +390,7 @@ exports.handleUserMessage = async (message, userId = null) => {
             console.log("No phone context found for user");
             // Không có ngữ cảnh -> xử lý như câu hỏi chung
             try {
-              response = await this.generateGeneralInfo(analysis.mainQuestion, userId);
+              response = await exports.generateGeneralInfo(analysis.mainQuestion, userId);
               console.log(`Generated general info response, length: ${response.length}`);
             } catch (error) {
               console.error("Error generating general info:", error);
@@ -402,7 +402,7 @@ exports.handleUserMessage = async (message, userId = null) => {
           console.log("No user ID provided for context lookup");
           // Không có user ID -> xử lý như câu hỏi chung
           try {
-            response = await this.generateGeneralInfo(analysis.mainQuestion, null);
+            response = await exports.generateGeneralInfo(analysis.mainQuestion, null);
             console.log(`Generated general info response, length: ${response.length}`);
           } catch (error) {
             console.error("Error generating general info:", error);
@@ -417,7 +417,7 @@ exports.handleUserMessage = async (message, userId = null) => {
         // Xử lý câu hỏi chung về Bát Tinh
         console.log("Processing general info question");
         try {
-          response = await this.generateGeneralInfo(analysis.mainQuestion, userId);
+          response = await exports.generateGeneralInfo(analysis.mainQuestion, userId);
           console.log(`Generated general info response, length: ${response.length}`);
         } catch (error) {
           console.error("Error generating general info:", error);
@@ -437,7 +437,7 @@ exports.handleUserMessage = async (message, userId = null) => {
             console.log(`Using existing context for phone ${phoneContext.phoneNumber}`);
             // Có ngữ cảnh -> xử lý như follow-up
             try {
-              response = await this.generateFollowUpResponse(message, userId, phoneContext.analysisData);
+              response = await exports.generateFollowUpResponse(message, userId, phoneContext.analysisData);
               console.log(`Generated follow-up response, length: ${response.length}`);
             } catch (error) {
               console.error("Error generating follow-up response:", error);
@@ -954,7 +954,7 @@ module.exports = {
   generateFollowUpResponse: async (question, userId, analysisData = null) => {
     // If no history or user ID, treat as a general question
     if (!userId || !conversationManager.hasActiveConversation(userId)) {
-      return this.generateGeneralInfo(question, userId);
+      return exports.generateGeneralInfo(question, userId);
     }
     
     // Get context from history if not provided
