@@ -56,6 +56,10 @@ const getSystemPrompt = () => `
  * @returns {string} Formatted prompt
  */
 const generatePrompt = (type, data) => {
+  // Kiểm tra và log dữ liệu đầu vào
+  console.log(`Generating prompt for type: ${type}`);
+  console.log(`Data structure keys: ${data ? Object.keys(data).join(', ') : 'undefined'}`);
+  
   switch (type) {
     case 'analysis':
       return `
@@ -91,13 +95,14 @@ const generatePrompt = (type, data) => {
         
 
         # THÔNG TIN CHI TIẾT VỀ CÁC SAO
-        ${data.starSequence.map(star => 
-          `- ${star.originalPair}: ${star.name} (${star.nature}, Năng lượng: ${star.energyLevel || 0}/4)
-          Ý nghĩa: ${star.detailedDescription || "Không có mô tả"}`
-        ).join('\n\n')}
+        ${data.starSequence && Array.isArray(data.starSequence) ? 
+          data.starSequence.map(star => 
+            `- ${star.originalPair}: ${star.name} (${star.nature}, Năng lượng: ${star.energyLevel || 0}/4)
+            Ý nghĩa: ${star.detailedDescription || "Không có mô tả"}`
+          ).join('\n\n') : "Không có thông tin chi tiết về các sao."}
         
         # TỔ HỢP CÁC SAO LIỀN KỀ
-        ${data.starCombinations && data.starCombinations.length > 0 ?
+        ${data.starCombinations && Array.isArray(data.starCombinations) && data.starCombinations.length > 0 ?
           data.starCombinations.map(combo => 
             `- ${combo.firstStar.name} (${combo.firstStar.originalPair}) + ${combo.secondStar.name} (${combo.secondStar.originalPair}) [Năng lượng: ${combo.totalEnergy || 0}/8]
             Tính chất: ${combo.isPositive ? "Tích cực" : (combo.isNegative ? "Tiêu cực" : "Trung tính")}
@@ -111,14 +116,14 @@ const generatePrompt = (type, data) => {
           : "Không có tổ hợp sao liền kề đáng chú ý."}
         
         # TỔ HỢP SỐ ĐẶC BIỆT
-        ${data.keyCombinations && data.keyCombinations.length > 0 ? 
+        ${data.keyCombinations && Array.isArray(data.keyCombinations) && data.keyCombinations.length > 0 ? 
           data.keyCombinations.map(combo => 
             `- ${combo.value}: ${combo.description || "Không có mô tả"}`
           ).join('\n')
           : "Không có tổ hợp số đặc biệt."}
         
         # CẢNH BÁO
-        ${data.dangerousCombinations && data.dangerousCombinations.length > 0 ?
+        ${data.dangerousCombinations && Array.isArray(data.dangerousCombinations) && data.dangerousCombinations.length > 0 ?
           data.dangerousCombinations.map(warning => 
             `- ${warning.combination}: ${warning.description || "Không có mô tả"}`
           ).join('\n')
@@ -146,7 +151,17 @@ const generatePrompt = (type, data) => {
               `;
       
     case 'question':
-      const formattedPhone = data.analysisContext?.phoneNumber?.replace(/(\d{4})(\d{3})(\d{3})/, '$1 $2 $3') || '';
+      const formattedPhone = (data.analysisContext && data.analysisContext.phoneNumber) ? 
+                          data.analysisContext.phoneNumber.replace(/(\d{4})(\d{3})(\d{3})/, '$1 $2 $3') : 
+                          (data.phoneNumber ? data.phoneNumber.replace(/(\d{4})(\d{3})(\d{3})/, '$1 $2 $3') : 'Không xác định');
+      
+      // Kiểm tra và chuẩn bị dữ liệu cho prompt an toàn
+      // Sử dụng dữ liệu từ data trực tiếp hoặc từ data.analysisContext nếu có
+      const starSequence = data.starSequence || (data.analysisContext ? data.analysisContext.starSequence : []);
+      const keyCombinations = data.keyCombinations || (data.analysisContext ? data.analysisContext.keyCombinations : []);
+      const dangerousCombinations = data.dangerousCombinations || (data.analysisContext ? data.analysisContext.dangerousCombinations : []);
+      const keyPositions = data.keyPositions || (data.analysisContext ? data.analysisContext.keyPositions : null);
+      const last3DigitsAnalysis = data.last3DigitsAnalysis || (data.analysisContext ? data.analysisContext.last3DigitsAnalysis : null);
       
       return `
     Với tư cách là một chuyên gia xem số điện thoại năng lượng dày dạn kinh nghiệm, hãy trả lời câu hỏi về số ${formattedPhone}: "${data.question}"
@@ -162,42 +177,43 @@ const generatePrompt = (type, data) => {
        
         THÔNG TIN PHÂN TÍCH SỐ ĐIỆN THOẠI ${formattedPhone}:
         
- # THÔNG TIN CHI TIẾT VỀ CÁC SAO
-        ${data.starSequence.map(star => 
-          `- ${star.originalPair}: ${star.name} (${star.nature}, Năng lượng: ${star.energyLevel || 0}/4)
-          Ý nghĩa: ${star.detailedDescription || "Không có mô tả"}`
-        ).join('\n\n')}
+# THÔNG TIN CHI TIẾT VỀ CÁC SAO
+        ${Array.isArray(starSequence) ? 
+          starSequence.map(star => 
+            `- ${star.originalPair}: ${star.name} (${star.nature}, Năng lượng: ${star.energyLevel || 0}/4)
+            Ý nghĩa: ${star.detailedDescription || "Không có mô tả"}`
+          ).join('\n\n') : "Không có thông tin chi tiết về các sao."}
         
         # TỔ HỢP SỐ ĐẶC BIỆT
-        ${data.keyCombinations && data.keyCombinations.length > 0 ? 
-          data.keyCombinations.map(combo => 
-            `- ${combo.value}: ${combo.detailedDescription || "Không có mô tả"}`
+        ${Array.isArray(keyCombinations) && keyCombinations.length > 0 ? 
+          keyCombinations.map(combo => 
+            `- ${combo.value}: ${combo.detailedDescription || combo.description || "Không có mô tả"}`
           ).join('\n')
           : "Không có tổ hợp số đặc biệt."}
         
         # CẢNH BÁO
-        ${data.dangerousCombinations && data.dangerousCombinations.length > 0 ?
-          data.dangerousCombinations.map(warning => 
+        ${Array.isArray(dangerousCombinations) && dangerousCombinations.length > 0 ?
+          dangerousCombinations.map(warning => 
             `- ${warning.combination}: ${warning.description || "Không có mô tả"}`
           ).join('\n')
           : "Không có cảnh báo đặc biệt."}
         
         # PHÂN TÍCH VỊ TRÍ SỐ ĐẶC BIỆT
-        ${data.keyPositions ? 
-          `- Số cuối: ${data.keyPositions.lastDigit.value} - ${data.keyPositions.lastDigit.meaning || "Không có ý nghĩa"}`
+        ${keyPositions ? 
+          `- Số cuối: ${keyPositions.lastDigit ? keyPositions.lastDigit.value : "?"} - ${keyPositions.lastDigit ? keyPositions.lastDigit.meaning : "Không có ý nghĩa"}`
           : "Không có phân tích vị trí số."}
-        ${data.keyPositions && data.keyPositions.thirdFromEnd ? 
-          `- Số thứ 3 từ cuối: ${data.keyPositions.thirdFromEnd.value} - ${data.keyPositions.thirdFromEnd.meaning || "Không có ý nghĩa"}` 
+        ${keyPositions && keyPositions.thirdFromEnd ? 
+          `- Số thứ 3 từ cuối: ${keyPositions.thirdFromEnd.value} - ${keyPositions.thirdFromEnd.meaning || "Không có ý nghĩa"}` 
           : ""}
-        ${data.keyPositions && data.keyPositions.fifthFromEnd ? 
-          `- Số thứ 5 từ cuối: ${data.keyPositions.fifthFromEnd.value} - ${data.keyPositions.fifthFromEnd.meaning || "Không có ý nghĩa"}` 
+        ${keyPositions && keyPositions.fifthFromEnd ? 
+          `- Số thứ 5 từ cuối: ${keyPositions.fifthFromEnd.value} - ${keyPositions.fifthFromEnd.meaning || "Không có ý nghĩa"}` 
           : ""}
         
         # PHÂN TÍCH 3 SỐ CUỐI
-        ${data.last3DigitsAnalysis ? 
-          `- Cặp số cuối: ${data.last3DigitsAnalysis.lastThreeDigits || "Không xác định"}
-          - Sao tương ứng: ${data.last3DigitsAnalysis.firstPair?.starInfo?.name || "Không xác định"}
-          - Tính chất: ${data.last3DigitsAnalysis.firstPair?.starInfo?.nature || "Không xác định"}`
+        ${last3DigitsAnalysis ? 
+          `- Cặp số cuối: ${last3DigitsAnalysis.lastThreeDigits || "Không xác định"}
+          - Sao tương ứng: ${last3DigitsAnalysis.firstPair?.starInfo?.name || "Không xác định"}
+          - Tính chất: ${last3DigitsAnalysis.firstPair?.starInfo?.nature || "Không xác định"}`
           : "Không có phân tích 3 số cuối."}
         
         Hãy trả lời câu hỏi "${data.question}" dựa trên phân tích trên. Cụ thể, chi tiết và chính xác về các khía cạnh liên quan đến câu hỏi.
@@ -211,9 +227,10 @@ const generatePrompt = (type, data) => {
           # SỐ THỨ ${index + 1}: ${analysisData.phoneNumber}
           
           ## Các sao chủ đạo:
-          ${analysisData.starSequence.slice(0, 5).map(star => 
-            `- ${star.originalPair}: ${star.name} (${star.nature}, Năng lượng: ${star.energyLevel || 0}/4)`
-          ).join('\n')}
+          ${Array.isArray(analysisData.starSequence) ? 
+            analysisData.starSequence.slice(0, 5).map(star => 
+              `- ${star.originalPair}: ${star.name} (${star.nature}, Năng lượng: ${star.energyLevel || 0}/4)`
+            ).join('\n') : "Không có thông tin về sao"}
           
           ## Cân bằng: ${analysisData.balance === 'BALANCED' ? 'Cân bằng tốt' : 
                       analysisData.balance === 'CAT_HEAVY' ? 'Thiên về cát' : 
@@ -225,10 +242,10 @@ const generatePrompt = (type, data) => {
           
           ## Điểm chất lượng: ${analysisData.qualityScore || 0}/100
           
-          ${analysisData.keyCombinations && analysisData.keyCombinations.length > 0 ? 
+          ${Array.isArray(analysisData.keyCombinations) && analysisData.keyCombinations.length > 0 ? 
             `## Tổ hợp đặc biệt:\n${analysisData.keyCombinations.map(c => `- ${c.value}: ${c.description}`).join('\n')}` : ""}
             
-          ${analysisData.dangerousCombinations && analysisData.dangerousCombinations.length > 0 ? 
+          ${Array.isArray(analysisData.dangerousCombinations) && analysisData.dangerousCombinations.length > 0 ? 
             `## Cảnh báo:\n${analysisData.dangerousCombinations.map(c => `- ${c.combination}: ${c.description}`).join('\n')}` : ""}
         `;
       });
