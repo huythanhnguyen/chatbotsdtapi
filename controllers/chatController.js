@@ -40,9 +40,9 @@ class ChatController {
       const { phoneNumber } = req.body;
       const userId = req.user ? req.user.id : null;
       
-      if (!phoneNumber || phoneNumber.length < 10) {
-        return res.status(400).json({ error: 'Số điện thoại không hợp lệ' });
-      }
+     // if (!phoneNumber || phoneNumber.length < 10) {
+      //  return res.status(400).json({ error: 'Số điện thoại không hợp lệ' });
+      //}
       
       // Phân tích số điện thoại
       const analysisData = await analysisService.analyzePhoneNumber(phoneNumber);
