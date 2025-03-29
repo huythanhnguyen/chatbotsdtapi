@@ -8,10 +8,11 @@ exports.handleChatMessage = async (req, res) => {
   try {
     const { message } = req.body;
     const userId = req.user ? req.user.id : null;
+    console.log("[CONTROLLER] Received message:", req.body.message);
     
     // Sử dụng hàm mới để xử lý tin nhắn
     const response = await geminiService.handleUserMessage(message, userId);
-    
+    console.log("[CONTROLLER] Calling geminiService.handleUserMessage");
     return res.json({
       success: true,
       response

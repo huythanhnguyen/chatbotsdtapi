@@ -19,6 +19,26 @@ const config = {
   CACHE_DURATION: 30* 24 * 60 * 60 * 1000,
   DEBUG: process.env.NODE_ENV === 'development'
 };
+// Thêm hàm logger ở đầu file
+const logger = {
+  debug: (message, data) => {
+    if (config.DEBUG) {
+      console.log(`[DEBUG] ${message}`);
+      if (data) console.log(JSON.stringify(data, null, 2));
+    }
+  },
+  error: (message, error) => {
+    console.error(`[ERROR] ${message}`);
+    if (error) {
+      console.error(error.message);
+      if (error.stack) console.error(error.stack);
+    }
+  },
+  info: (message, data) => {
+    console.log(`[INFO] ${message}`);
+    if (data) console.log(JSON.stringify(data, null, 2));
+  }
+};
 
 // Cache and conversation tracking
 const responseCache = new Map();
@@ -242,6 +262,8 @@ const conversationManager = {
  */
 exports.handleUserMessage = async (message, userId = null) => {
   try {
+    logger.info(`Received message from user ${userId || 'anonymous'}:`, { message });
+    
     // Phân tích ý định người dùng
     const analysis = await analyzeUserIntent(message);
     
@@ -618,7 +640,16 @@ const callGeminiAPI = async (prompt, options = {}) => {
     }
     responseCache.delete(cacheKey);
   }
-
+  // Thêm log chi tiết trước khi gọi API
+  logger.debug('Calling Gemini API with options:', { 
+    temperature, 
+    maxTokens, 
+    useCache, 
+    useHistory,
+    promptLength: prompt.length,
+    promptPreview: prompt.substring(0, 200) + '...'
+  });
+  
   // API call with retry logic
   const makeApiCall = async (attempt = 1) => {
     try {
