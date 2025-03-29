@@ -241,11 +241,31 @@ exports.askQuestion = async (req, res) => {
             });
           }
           
-          // Sử dụng phương thức follow-up response
-          const followUpResponse = await geminiService.generateFollowUpResponse(
+          // Thay đổi cách xử lý follow-up: sử dụng generateResponse trực tiếp với context đầy đủ
+          // thay vì sử dụng generateFollowUpResponse
+          console.log('Using direct generateResponse for follow-up question');
+          
+          // Log để debug
+          console.log('Analysis data structure:', 
+            JSON.stringify({
+              hasStarSequence: !!followupRecord.result.starSequence,
+              hasEnergyLevel: !!followupRecord.result.energyLevel,
+              hasKeyCombinations: !!followupRecord.result.keyCombinations,
+              phoneNumber: followupRecord.result.phoneNumber || followupRecord.phoneNumber
+            })
+          );
+          
+          // Đảm bảo phoneNumber được thiết lập trong context
+          const analysisContext = {
+            ...followupRecord.result,
+            phoneNumber: followupRecord.result.phoneNumber || followupRecord.phoneNumber
+          };
+          
+          // Sử dụng generateResponse trực tiếp
+          const followUpResponse = await geminiService.generateResponse(
             question, 
-            userId, 
-            followupRecord.result
+            analysisContext, 
+            userId
           );
           
           return res.status(200).json({
