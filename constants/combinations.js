@@ -2,338 +2,387 @@ const COMBINATION_INTERPRETATIONS = {
     // Các tổ hợp sao với nhau
     STAR_PAIRS: {
         
-            // Sinh Khí với các sao khác
-            "SINH_KHI_SINH_KHI": {
-                stars: ["SINH_KHI", "SINH_KHI"],
-                description: "tập hợp tăng cường năng lượng quý nhân",
-                detailedDescription: [
-                    "Thường lạc quan, cởi mở, linh hoạt và dễ kết bạn.",
-                    "Nhận được sự giúp đỡ khi gặp khó khăn, được nhiều người mong muốn vì sự tích cực, dễ hòa đồng và mang lại điều tốt đẹp cho người xung",
-                    "lý trí, khách quan và bình tĩnh trong hành động.",
-                    "Quá nhiều năng lượng Sinh Khí có thể dẫn đến thiếu quyết đoán, động lực và gây ra sự lười biếng.",
-                ],
-            },
-            "SINH_KHI_THIEN_Y": {
-                stars: ["SINH_KHI", "THIEN_Y"],
-                description: "Quý nhân trợ giúp, tài lộc hanh thông, được người khác quý mến và giúp đỡ.",
-                detailedDescription: [
-                    "Thiên Y tượng trưng cho nguồn tiên, Sinh Khí cũng có nghĩa là Quý nhân",
-                    "nên có thể hiểu là Về mặt tài lộc thì có cao nhân giúp đỡ", 
-                    "nên tổng số được Thiên Y và  Sinh Khí bảo vệ, bạn không cần phải lo lắng quá nhiều về tài lộc.",
+        // Các sao khác với Sinh Khí
+        "SINH_KHI_SINH_KHI": {
+            stars: ["SINH_KHI", "SINH_KHI"],
+            description: "tập hợp tăng cường năng lượng quý nhân",
+            detailedDescription: [
+                "Thường lạc quan, cởi mở, linh hoạt và dễ kết bạn.",
+                "Nhận được sự giúp đỡ khi gặp khó khăn, được nhiều người mong muốn vì sự tích cực, dễ hòa đồng và mang lại điều tốt đẹp cho người xung",
+                "lý trí, khách quan và bình tĩnh trong hành động.",
+                "Quá nhiều năng lượng Sinh Khí có thể dẫn đến thiếu quyết đoán, động lực và gây ra sự lười biếng.",
+            ],
+        },
+        "THIEN_Y_SINH_KHI": {
+            stars: ["THIEN_Y", "SINH_KHI"],
+            description: "Quý nhân trợ giúp, tài lộc hanh thông, được người khác quý mến và giúp đỡ.",
+        },
+        "DIEN_NIEN_SINH_KHI": {
+            stars: ["DIEN_NIEN", "SINH_KHI"],
+            description: "Sự nghiệp vững chắc, có quý nhân dẫn dắt, công việc thuận lợi và phát triển."
+        },
+        "PHUC_VI_SINH_KHI": {
+            stars: ["PHUC_VI", "SINH_KHI"],
+            description: ""
+        },
+        "HOA_HAI_SINH_KHI": {
+            stars: ["HOA_HAI", "SINH_KHI"],
+            description: "Gặp quý nhân nhưng dễ mất tiền, thu nhập cao nhưng chi tiêu lớn."
+        },
+        "LUC_SAT_SINH_KHI": {
+            stars: ["LUC_SAT", "SINH_KHI"],
+            description: "Được giúp đỡ trong lĩnh vực dịch vụ, quan hệ xã hội tốt nhưng cẩn thận người không tốt."
+        },
+        "NGU_QUY_SINH_KHI": {
+            stars: ["NGU_QUY", "SINH_KHI"],
+            description: "Có quý nhân nhưng tư duy không ổn định, dễ thay đổi, nên cẩn trọng với quyết định."
+        },
+        "TUYET_MENH_SINH_KHI": {
+            stars: ["TUYET_MENH", "SINH_KHI"],
+            description: "Gặp quý nhân trong lúc khó khăn, được giúp đỡ nhưng phải nỗ lực nhiều."
+        },
+    
+        // Các sao khác với Thiên Y
+        "SINH_KHI_THIEN_Y": {
+            stars: ["SINH_KHI", "THIEN_Y"],
+            description: "Quý nhân trợ giúp, tài lộc hanh thông, được người khác quý mến và giúp đỡ.",
+            detailedDescription: [
+                "Thiên Y tượng trưng cho nguồn tiên, Sinh Khí cũng có nghĩa là Quý nhân",
+                "nên có thể hiểu là Về mặt tài lộc thì có cao nhân giúp đỡ", 
+                "nên tổng số được Thiên Y và  Sinh Khí bảo vệ, bạn không cần phải lo lắng quá nhiều về tài lộc.",
+            ]
+        },
+        "THIEN_Y_THIEN_Y": {
+            stars: ["THIEN_Y", "THIEN_Y"],
+            description: "tụ tập tăng cường năng lượng tài phú, hiện tượng hôn nhân.",
+            detailedDescription: [
+                "Đặc điểm chính của từ trường này là sự giàu có tích cực",
+                "là người rộng lượng, không thù dai, có tư tưởng rộng rãi và sẽ không quan tâm những vấn đề tầm thường",
+                "Trong giao tiếp giữa các cá nhân, dễ xúc động, quá tốt bụng nên dễ bị tổn thương;",
+                "Không thiếu tiền nên không quan tâm đến tiền lắm, nếu không chú tâm sẽ bỏ lỡ cơ hội kiếm tiền.",
+                "Người có từ trường Thiên Y giỏi quan hệ, đào hoa tích cực",
+                "đường tình duyên của họ suôn sẻ hơn, gặp được bạn đời sẽ không khó, sẽ gặp được nhiều người phù hợp.",
+                "Vì đặc điểm này của đào hoa mạnh mẽ, mọi mối quan hệ đều sẽ ngọt ngào và tươi đẹp",
+                "nhưng cũng cần lưu ý không nên có nhiều từ trường Thiên Y trong dãy số, nếu không sẽ dễ xảy ra nhiều cuộc hôn nhân.",
+            ]
+        },
+        "DIEN_NIEN_THIEN_Y": {
+            stars: ["DIEN_NIEN", "THIEN_Y"],
+            description: "Tiền tài dồi dào, công việc ổn định, xây dựng được nguồn thu nhập bền vững."
+        },
+        "PHUC_VI_THIEN_Y": {
+            stars: ["PHUC_VI", "THIEN_Y"],
+            description: "Thông qua kiên nhẫn kiên trì mà tạo ra tài phú",
+            detailedDescription:[
+               "Phục Vị có ý nghĩa tiếp tục và tiếp tục năng lượng của từ trường trước đó" , 
+               "vì vậy trong sự kết hợp giữa Phục vị và Thiên Y , việc phân tích chủ yếu phụ thuộc vào từ trường trước đó là gì" 
+            ]
+        },
+        "HOA_HAI_THIEN_Y": {
+            stars: ["HOA_HAI", "THIEN_Y"],
+            description: "Thông qua ăn nói mà kiếm tiền. ăn nói lưu loát, có tài hùng biện và có thể kiếm tiền nhờ tài ăn nói của mình."
+        },
+        "LUC_SAT_THIEN_Y": {
+            stars: ["LUC_SAT", "THIEN_Y"],
+            description: "Kiếm tiền tốt trong lĩnh vực dịch vụ, tình cảm tốt nhưng phải cẩn thận với mối quan hệ."
+        },
+        "NGU_QUY_THIEN_Y": {
+            stars: ["NGU_QUY", "THIEN_Y"],
+            description: "Dùng sự thay đổi, sáng tạo và những ý tưởng mới để kiếm tiền. Có tài chính nhưng không ổn định, tư duy hay thay đổi, dễ đầu tư mạo hiểm."
+        },
+        "TUYET_MENH_THIEN_Y": {
+            stars: ["TUYET_MENH", "THIEN_Y"],
+            description: "Thông qua đầu tư mạo hiểm mà kiếm tiền.Tiền bạc dễ đến nhưng cũng dễ mất, đầu tư nhiều nhưng phải cẩn trọng.",
+            detailedDescription:["dùng trí tuệ và sự quyết đoán để kiếm tiền.",
+                    "Những người có sự kết hợp này thường rất thông minh, nhạy bén, có khả năng phân tích và đưa ra quyết định nhanh chóng.",
+                    " Họ thường thích hợp với những công việc mang tính thách thức và có yếu tố cạnh tranh cao.",
+                "Tuy nhiên, cũng có nghĩa là dễ gặp phải những rủi ro và thất bại trong đầu tư.",
+                    "Cần phải có sự cân nhắc kỹ lưỡng và lên kế hoạch cụ thể trước khi đưa ra bất kỳ quyết định nào đến tiền bạc.",
+                "Về mặt sức khỏe, Tuyệt Mệnh có thể ảnh hưởng đến hệ thống xương khớp và các vấn đề liên quan đến tai nạn bất ngờ.",
+                " chú ý bảo vệ sức khỏe và tránh những hoạt động nguy hiểm.",
                 ]
-            },
-            "SINH_KHI_DIEN_NIEN": {
-                stars: ["SINH_KHI", "DIEN_NIEN"], 
-                description: "Sự nghiệp vững chắc, có quý nhân dẫn dắt, công việc thuận lợi và phát triển.",
-            },
-            "SINH_KHI_PHUC_VI": {
-                stars: ["SINH_KHI", "PHUC_VI"],
-                description: "trí tuệ cảm xúc cao, sự nổi tiếng và lạc quan, cao thượng, thụ động, thận trọng và làm việc tỉ mỉ.",
-                detailedDescription:[
-                    " trí tuệ cảm xúc cao, sự nổi tiếng và lạc quan, cao thượng.",
-                    " Một nhược điểm là sự lười biếng của Sinh Khí có thể tăng lên khi Phục Vị mạnh, dẫn đến trì hoãn công việc.",
-                    "Điều này gây bất lợi cho những ai muốn khởi nghiệp hoặc thăng tiến do tính bảo thủ của Phục Vị.",
-                    "Về mặt tình cảm, họ kiên nhẫn và chậm rãi giải quyết các vấn đề.",
-                    "Đặc điểm của người có nhiều Phục Vị là bảo thủ, bướng bỉnh, thận trọng quá mức và ngại rủi ro.",
-                    "Trong sự nghiệp, họ thường chờ đợi thời cơ thích hợp thay vì chủ động.",
-                ],
-            },
-            "SINH_KHI_HOA_HAI": {
-                stars: ["SINH_KHI", "HOA_HAI"],
-                description: "Gặp quý nhân nhưng dễ mất tiền, thu nhập cao nhưng chi tiêu lớn.",
-            },
-            "SINH_KHI_LUC_SAT": {
-                stars: ["SINH_KHI", "LUC_SAT"],
-                description: "Được giúp đỡ trong lĩnh vực dịch vụ, quan hệ xã hội tốt nhưng cẩn thận người không tốt.",
-            },
-            "SINH_KHI_NGU_QUY": {
-                stars: ["SINH_KHI", "NGU_QUY"],
-                description: "Có quý nhân nhưng tư duy không ổn định, dễ thay đổi, nên cẩn trọng với quyết định.",
-            },
-            "SINH_KHI_TUYET_MENH": {
-                stars: ["SINH_KHI", "TUYET_MENH"],
-                description: "Gặp quý nhân trong lúc khó khăn, được giúp đỡ nhưng phải nỗ lực nhiều.",
-            },
-        
-            // Thiên Y với các sao khác
-            "THIEN_Y_SINH_KHI": {
-                stars: ["THIEN_Y", "SINH_KHI"],
-                description: "Quý nhân trợ giúp, tài lộc hanh thông, được người khác quý mến và giúp đỡ.",
-            },
-            "THIEN_Y_THIEN_Y": {
-                stars: ["THIEN_Y", "THIEN_Y"],
-                description: "tụ tập tăng cường năng lượng tài phú, hiện tượng hôn nhân.",
-                detailedDescription: [
-                    "Đặc điểm chính của từ trường này là sự giàu có tích cực",
-                    "là người rộng lượng, không thù dai, có tư tưởng rộng rãi và sẽ không quan tâm những vấn đề tầm thường",
-                    "Trong giao tiếp giữa các cá nhân, dễ xúc động, quá tốt bụng nên dễ bị tổn thương;",
-                    "Không thiếu tiền nên không quan tâm đến tiền lắm, nếu không chú tâm sẽ bỏ lỡ cơ hội kiếm tiền.",
-                    "Người có từ trường Thiên Y giỏi quan hệ, đào hoa tích cực",
-                    "đường tình duyên của họ suôn sẻ hơn, gặp được bạn đời sẽ không khó, sẽ gặp được nhiều người phù hợp.",
-                    "Vì đặc điểm này của đào hoa mạnh mẽ, mọi mối quan hệ đều sẽ ngọt ngào và tươi đẹp",
-                    "nhưng cũng cần lưu ý không nên có nhiều từ trường Thiên Y trong dãy số, nếu không sẽ dễ xảy ra nhiều cuộc hôn nhân.",
-                ]
-            },
-            "THIEN_Y_DIEN_NIEN": {
-                stars: ["THIEN_Y", "DIEN_NIEN"],
-                description: "Tiền tài dồi dào, công việc ổn định, xây dựng được nguồn thu nhập bền vững.",
-            },
-            "THIEN_Y_PHUC_VI": {
-                stars: ["THIEN_Y", "PHUC_VI"],
-                description: "nguồn tài lộc liên tục và sự tiếp nối của sự giàu có",
-                detailedDescription: [
-                    "Tổ hợp này thường dẫn đến việc tăng lương hoặc có thêm các nguồn thu nhập thụ động khác. ",
-                    " sự bất an của Phục Vị có thể hướng đến những khía cạnh khác nhau của Thiên Y, đặc biệt là về tài chính. ",
-                    "từ trường Thiên Y kết hợp Phục Vị có thể không giỏi quản lý tiền bạc và dễ lo lắng về tài chính, dù có xu hướng tiết kiệm. ",
-                    " Trong các mối quan hệ, họ thường lo lắng về sự được mất và đưa ra phán đoán dựa trên các yếu tố khác.",
-                    "Do cảm thấy bất an về mặt cảm xúc, thường giỏi nắm bắt chi tiết của đối phương và dễ hoảng sợ bởi những điều nhỏ nhặt, lo lắng về sự được mất.",
-                ]
-            },
-            "THIEN_Y_HOA_HAI": {
-                stars: ["THIEN_Y", "HOA_HAI"],
-                description: "Tài lộc tốt nhưng dễ hao tiền, mọi người thích giao du nhưng tốn kém.",
-            },
-            "THIEN_Y_LUC_SAT": {
-                stars: ["THIEN_Y", "LUC_SAT"],
-                description: "Kiếm tiền tốt trong lĩnh vực dịch vụ, tình cảm tốt nhưng phải cẩn thận với mối quan hệ.",
-                detailedDescription: [
-                    "Đặc điểm chính của từ trường này là sự giàu có tích cực",
-                    "là người rộng lượng, không thù dai, có tư tưởng rộng rãi và sẽ không quan tâm những vấn đề tầm thường",
-                    "Trong giao tiếp giữa các cá nhân, dễ xúc động, quá tốt bụng nên dễ bị tổn thương;",
-                    "Không thiếu tiền nên không quan tâm đến tiền lắm, nếu không chú tâm sẽ bỏ lỡ cơ hội kiếm tiền.",
-                    "Người có từ trường Thiên Y giỏi quan hệ, đào hoa tích cực",
-                    "đường tình duyên của họ suôn sẻ hơn, gặp được bạn đời sẽ không khó, sẽ gặp được nhiều người phù hợp.",
-                    "Vì đặc điểm này của đào hoa mạnh mẽ, mọi mối quan hệ đều sẽ ngọt ngào và tươi đẹp",
-                    "nhưng cũng cần lưu ý không nên có nhiều từ trường Thiên Y trong dãy số, nếu không sẽ dễ xảy ra nhiều cuộc hôn nhân.",
-                ]
-            },
-            "THIEN_Y_NGU_QUY": {
-                stars: ["THIEN_Y", "NGU_QUY"],
-                description: "Có tài chính nhưng không ổn định, tư duy hay thay đổi, dễ đầu tư mạo hiểm.",
-            },
-            "THIEN_Y_TUYET_MENH": {
-                stars: ["THIEN_Y", "TUYET_MENH"],
-                description: "Tiền bạc dễ đến nhưng cũng dễ mất, đầu tư nhiều nhưng phải cẩn trọng."
-            },
-        
-            // Diên Niên với các sao khác
-            "DIEN_NIEN_SINH_KHI": {
-                stars: ["DIEN_NIEN", "SINH_KHI"],
-                description: "Sự nghiệp vững chắc, có quý nhân dẫn dắt, công việc thuận lợi và phát triển."
-            },
-            "DIEN_NIEN_THIEN_Y": {
-                stars: ["DIEN_NIEN", "THIEN_Y"],
-                description: "Tiền tài dồi dào, công việc ổn định, xây dựng được nguồn thu nhập bền vững."
-            },
-            "DIEN_NIEN_DIEN_NIEN": {
-                stars: ["DIEN_NIEN", "DIEN_NIEN"],
-                description: ""
-            },
-            "DIEN_NIEN_PHUC_VI": {
-                stars: ["DIEN_NIEN", "PHUC_VI"],
-                description: " sự mạnh mẽ trong công việc, khả năng thực hành tốt và kinh nghiệm dày dặn, giúp họ trở thành người dẫn dắt ý kiến trong lĩnh vực chuyên môn"
-            },
-            "DIEN_NIEN_HOA_HAI": {
-                stars: ["DIEN_NIEN", "HOA_HAI"],
-                description: "Có khả năng chuyên môn tốt nhưng dễ tiêu tiền, nói nhiều, nên tập trung vào chất lượng."
-            },
-            "DIEN_NIEN_LUC_SAT": {
-                stars: ["DIEN_NIEN", "LUC_SAT"],
-                description: "Thích hợp làm việc trong ngành dịch vụ, quan hệ khách hàng tốt, nhưng dễ bị lợi dụng."
-            },
-            "DIEN_NIEN_NGU_QUY": {
-                stars: ["DIEN_NIEN", "NGU_QUY"],
-                description: "Chuyên môn tốt nhưng tư duy không ổn định, dễ thay đổi công việc hoặc phương hướng."
-            },
-            "DIEN_NIEN_TUYET_MENH": {
-                stars: ["DIEN_NIEN", "TUYET_MENH"],
-                description: "Có năng lực chuyên môn nhưng phải nỗ lực nhiều, dốc sức làm việc."
-            },
-        
-            // Phục Vị với các sao khác
-            "PHUC_VI_SINH_KHI": {
-                stars: ["PHUC_VI", "SINH_KHI"],
-                description: ""
-            },
-            "PHUC_VI_THIEN_Y": {
-                stars: ["PHUC_VI", "THIEN_Y"],
-                description: ""
-            },
-            "PHUC_VI_DIEN_NIEN": {
-                stars: ["PHUC_VI", "DIEN_NIEN"],
-                description: ""
-            },
-            "PHUC_VI_PHUC_VI": {
-                stars: ["PHUC_VI", "PHUC_VI"],
-                description: ""
-            },
-            "PHUC_VI_HOA_HAI": {
-                stars: ["PHUC_VI", "HOA_HAI"],
-                description: ""
-            },
-            "PHUC_VI_LUC_SAT": {
-                stars: ["PHUC_VI", "LUC_SAT"],
-                description: ""
-            },
-            "PHUC_VI_NGU_QUY": {
-                stars: ["PHUC_VI", "NGU_QUY"],
-                description: ""
-            },
-            "PHUC_VI_TUYET_MENH": {
-                stars: ["PHUC_VI", "TUYET_MENH"],
-                description: ""
-            },
-        
-            // Họa Hại với các sao khác
-            "HOA_HAI_SINH_KHI": {
-                stars: ["HOA_HAI", "SINH_KHI"],
-                description: "Gặp quý nhân nhưng dễ mất tiền, thu nhập cao nhưng chi tiêu lớn."
-            },
-            "HOA_HAI_THIEN_Y": {
-                stars: ["HOA_HAI", "THIEN_Y"],
-                description: "Thông qua ăn nói mà kiếm tiền. ăn nói lưuloát, có tài hùng biện và có thể kiếm tiền nhờ tài ăn nói của mình."
-            },
-            "HOA_HAI_DIEN_NIEN": {
-                stars: ["HOA_HAI", "DIEN_NIEN"],
-                description: "Có khả năng chuyên môn tốt nhưng dễ tiêu tiền, nói nhiều, nên tập trung vào chất lượng."
-            },
-            "HOA_HAI_PHUC_VI": {
-                stars: ["HOA_HAI", "PHUC_VI"],
-                description: ""
-            },
-            "HOA_HAI_HOA_HAI": {
-                stars: ["HOA_HAI", "HOA_HAI"],
-                description: ""
-            },
-            "HOA_HAI_LUC_SAT": {
-                stars: ["HOA_HAI", "LUC_SAT"],
-                description: "Hao tiền trong các mối quan hệ xã hội, chi tiêu nhiều cho giao tiếp, quan hệ."
-            },
-            "HOA_HAI_NGU_QUY": {
-                stars: ["HOA_HAI", "NGU_QUY"],
-                description: "Tư duy không ổn định và hay nói nhiều, dễ phát ngôn bừa bãi gây rắc rối."
-            },
-            "HOA_HAI_TUYET_MENH": {
-                stars: ["HOA_HAI", "TUYET_MENH"],
-                description: "Chi tiêu lớn và liều lĩnh, dễ mạo hiểm trong tài chính dẫn đến mất mát."
-            },
-        
-            // Lục Sát với các sao khác
-            "LUC_SAT_SINH_KHI": {
-                stars: ["LUC_SAT", "SINH_KHI"],
-                description: "Được giúp đỡ trong lĩnh vực dịch vụ, quan hệ xã hội tốt nhưng cẩn thận người không tốt."
-            },
-            "LUC_SAT_THIEN_Y": {
-                stars: ["LUC_SAT", "THIEN_Y"],
-                description: "Kiếm tiền tốt trong lĩnh vực dịch vụ, tình cảm tốt nhưng phải cẩn thận với mối quan hệ."
-            },
-            "LUC_SAT_DIEN_NIEN": {
-                stars: ["LUC_SAT", "DIEN_NIEN"],
-                description: "Thích hợp làm việc trong ngành dịch vụ, quan hệ khách hàng tốt, nhưng dễ bị lợi dụng."
-            },
-            "LUC_SAT_PHUC_VI": {
-                stars: ["LUC_SAT", "PHUC_VI"],
-                description: ""
-            },
-            "LUC_SAT_HOA_HAI": {
-                stars: ["LUC_SAT", "HOA_HAI"],
-                description: "Hao tiền trong các mối quan hệ xã hội, chi tiêu nhiều cho giao tiếp, quan hệ."
-            },
-            "LUC_SAT_LUC_SAT": {
-                stars: ["LUC_SAT", "LUC_SAT"],
-                description: ""
-            },
-            "LUC_SAT_NGU_QUY": {
-                stars: ["LUC_SAT", "NGU_QUY"],
-                description: "Đào hoa nát, dễ có mối quan hệ không rõ ràng, tình cảm phức tạp."
-            },
-            "LUC_SAT_TUYET_MENH": {
-                stars: ["LUC_SAT", "TUYET_MENH"],
-                description: "Mối quan hệ xã hội tốn kém, phải nỗ lực nhiều trong giao tiếp nhưng ít kết quả."
-            },
-        
-            // Ngũ Quỷ với các sao khác
-            "NGU_QUY_SINH_KHI": {
-                stars: ["NGU_QUY", "SINH_KHI"],
-                description: "Có quý nhân nhưng tư duy không ổn định, dễ thay đổi, nên cẩn trọng với quyết định."
-            },
-            "NGU_QUY_THIEN_Y": {
-                stars: ["NGU_QUY", "THIEN_Y"],
-                description: "Dùng sự thay đổi, sáng tạo và những ý tưởng mới để kiếm tiền. Có tài chính nhưng không ổn định, tư duy hay thay đổi, dễ đầu tư mạo hiểm."
-            },
-            "NGU_QUY_DIEN_NIEN": {
-                stars: ["NGU_QUY", "DIEN_NIEN"],
-                description: "Chuyên môn tốt nhưng tư duy không ổn định, dễ thay đổi công việc hoặc phương hướng."
-            },
-            "NGU_QUY_PHUC_VI": {
-                stars: ["NGU_QUY", "PHUC_VI"],
-                description: ""
-            },
-            "NGU_QUY_HOA_HAI": {
-                stars: ["NGU_QUY", "HOA_HAI"],
-                description: "Tư duy không ổn định và hay nói nhiều, dễ phát ngôn bừa bãi gây rắc rối."
-            },
-            "NGU_QUY_LUC_SAT": {
-                stars: ["NGU_QUY", "LUC_SAT"],
-                description: "Đào hoa nát, dễ có mối quan hệ không rõ ràng, tình cảm phức tạp."
-            },
-            "NGU_QUY_NGU_QUY": {
-                stars: ["NGU_QUY", "NGU_QUY"],
-                description: "rất thông minh, tài giỏi và dễ đạt thành tựu trong công việc, không ổn định nhất , phản ứng nhanh lại gặp khó khăn trắc trở , không ổn định , ý nghĩ hay thay đổi ",
-                detailedDescription:[
-                    "Họ có khả năng suy nghĩ tốt và thường đưa ra những ý kiến giá trị, giúp ích cho sự nghiệp.",
-                    "Tuy nhiên, họ không phải là người điềm tĩnh và dễ bất mãn nếu không có cơ hội phát triển.",
-                    "luôn hướng đến những mục tiêu và lý tưởng cao hơn, không thích sự trì trệ",
-                    "Trong tình yêu, họ có xu hướng chủ động kết thúc mối quan hệ.",
-                    "Tổ hợp này liên quan đến sự thay đổi, nhiều ý tưởng, thức khuya và các vấn đề về tim mạch, mạch máu não."
-                ]
-            },
-            "NGU_QUY_TUYET_MENH": {
-                stars: ["NGU_QUY", "TUYET_MENH"],
-                description: "Tư duy bất ổn và liều lĩnh, dễ đưa ra quyết định sai lầm, gây hậu quả nghiêm trọng."
-            },
-        
-            // Tuyệt Mệnh với các sao khác
-            "TUYET_MENH_SINH_KHI": {
-                stars: ["TUYET_MENH", "SINH_KHI"],
-                description: "Gặp quý nhân trong lúc khó khăn, được giúp đỡ nhưng phải nỗ lực nhiều."
-            },
-            "TUYET_MENH_THIEN_Y": {
-                stars: ["TUYET_MENH", "THIEN_Y"],
-                description: "Thông qua đầu tư mạo hiểm mà kiếm tiền.Tiền bạc dễ đến nhưng cũng dễ mất, đầu tư nhiều nhưng phải cẩn trọng.",
-                detailedDescription:["dùng trí tuệ và sự quyết đoán để kiếm tiền.",
-                     "Những người có sự kết hợp này thường rất thông minh, nhạy bén, có khả năng phân tích và đưa ra quyết định nhanh chóng.",
-                     " Họ thường thích hợp với những công việc mang tính thách thức và có yếu tố cạnh tranh cao.",
-                    "Tuy nhiên, cũng có nghĩa là dễ gặp phải những rủi ro và thất bại trong đầu tư.",
-                     "Cần phải có sự cân nhắc kỹ lưỡng và lên kế hoạch cụ thể trước khi đưa ra bất kỳ quyết định nào đến tiền bạc.",
-                    "Về mặt sức khỏe, Tuyệt Mệnh có thể ảnh hưởng đến hệ thống xương khớp và các vấn đề liên quan đến tai nạn bất ngờ.",
-                    " chú ý bảo vệ sức khỏe và tránh những hoạt động nguy hiểm.",
-                    ]
-            },
-            "TUYET_MENH_DIEN_NIEN": {
-                stars: ["TUYET_MENH", "DIEN_NIEN"],
-                description: "Có năng lực chuyên môn nhưng phải nỗ lực nhiều, dốc sức làm việc."
-            },
-            "TUYET_MENH_PHUC_VI": {
-                stars: ["TUYET_MENH", "PHUC_VI"],
-                description: ""
-            },
-            "TUYET_MENH_HOA_HAI": {
-                stars: ["TUYET_MENH", "HOA_HAI"],
-                description: "Chi tiêu lớn và liều lĩnh, dễ mạo hiểm trong tài chính dẫn đến mất mát."
-            },
-            "TUYET_MENH_LUC_SAT": {
-                stars: ["TUYET_MENH", "LUC_SAT"],
-                description: "Mối quan hệ xã hội tốn kém, phải nỗ lực nhiều trong giao tiếp nhưng ít kết quả."
-            },
-            "TUYET_MENH_NGU_QUY": {
-                stars: ["TUYET_MENH", "NGU_QUY"],
-                description: "Tư duy bất ổn và liều lĩnh, dễ đưa ra quyết định sai lầm, gây hậu quả nghiêm trọng."
-            },
-            "TUYET_MENH_TUYET_MENH": {
-                stars: ["TUYET_MENH", "TUYET_MENH"],
-                description: ""
-            }
+        },
+    
+        // Các sao khác với Diên Niên
+        "SINH_KHI_DIEN_NIEN": {
+            stars: ["SINH_KHI", "DIEN_NIEN"], 
+            description: "Sự nghiệp vững chắc, có quý nhân dẫn dắt, công việc thuận lợi và phát triển.",
+        },
+        "THIEN_Y_DIEN_NIEN": {
+            stars: ["THIEN_Y", "DIEN_NIEN"],
+            description: "Tiền tài dồi dào, công việc ổn định, xây dựng được nguồn thu nhập bền vững.",
+        },
+        "DIEN_NIEN_DIEN_NIEN": {
+            stars: ["DIEN_NIEN", "DIEN_NIEN"],
+            description: ""
+        },
+        "PHUC_VI_DIEN_NIEN": {
+            stars: ["PHUC_VI", "DIEN_NIEN"],
+            description: ""
+        },
+        "HOA_HAI_DIEN_NIEN": {
+            stars: ["HOA_HAI", "DIEN_NIEN"],
+            description: "Có khả năng chuyên môn tốt nhưng dễ tiêu tiền, nói nhiều, nên tập trung vào chất lượng."
+        },
+        "LUC_SAT_DIEN_NIEN": {
+            stars: ["LUC_SAT", "DIEN_NIEN"],
+            description: "Thích hợp làm việc trong ngành dịch vụ, quan hệ khách hàng tốt, nhưng dễ bị lợi dụng."
+        },
+        "NGU_QUY_DIEN_NIEN": {
+            stars: ["NGU_QUY", "DIEN_NIEN"],
+            description: "Chuyên môn tốt nhưng tư duy không ổn định, dễ thay đổi công việc hoặc phương hướng."
+        },
+        "TUYET_MENH_DIEN_NIEN": {
+            stars: ["TUYET_MENH", "DIEN_NIEN"],
+            description: "Có năng lực chuyên môn nhưng phải nỗ lực nhiều, dốc sức làm việc."
+        },
+    
+        // Các sao khác với Phục Vị
+        "SINH_KHI_PHUC_VI": {
+            stars: ["SINH_KHI", "PHUC_VI"],
+            description: "trí tuệ cảm xúc cao, sự nổi tiếng và lạc quan, cao thượng, thụ động, thận trọng và làm việc tỉ mỉ.",
+            detailedDescription:[
+                " trí tuệ cảm xúc cao, sự nổi tiếng và lạc quan, cao thượng.",
+                " Một nhược điểm là sự lười biếng của Sinh Khí có thể tăng lên khi Phục Vị mạnh, dẫn đến trì hoãn công việc.",
+                "Điều này gây bất lợi cho những ai muốn khởi nghiệp hoặc thăng tiến do tính bảo thủ của Phục Vị.",
+                "Về mặt tình cảm, họ kiên nhẫn và chậm rãi giải quyết các vấn đề.",
+                "Đặc điểm của người có nhiều Phục Vị là bảo thủ, bướng bỉnh, thận trọng quá mức và ngại rủi ro.",
+                "Trong sự nghiệp, họ thường chờ đợi thời cơ thích hợp thay vì chủ động.",
+            ],
+        },
+        "THIEN_Y_PHUC_VI": {
+            stars: ["THIEN_Y", "PHUC_VI"],
+            description: "nguồn tài lộc liên tục và sự tiếp nối của sự giàu có",
+            detailedDescription: [
+                "Tổ hợp này thường dẫn đến việc tăng lương hoặc có thêm các nguồn thu nhập thụ động khác. ",
+                " sự bất an của Phục Vị có thể hướng đến những khía cạnh khác nhau của Thiên Y, đặc biệt là về tài chính. ",
+                "từ trường Thiên Y kết hợp Phục Vị có thể không giỏi quản lý tiền bạc và dễ lo lắng về tài chính, dù có xu hướng tiết kiệm. ",
+                " Trong các mối quan hệ, họ thường lo lắng về sự được mất và đưa ra phán đoán dựa trên các yếu tố khác.",
+                "Do cảm thấy bất an về mặt cảm xúc, thường giỏi nắm bắt chi tiết của đối phương và dễ hoảng sợ bởi những điều nhỏ nhặt, lo lắng về sự được mất.",
+            ]
+        },
+        "DIEN_NIEN_PHUC_VI": {
+            stars: ["DIEN_NIEN", "PHUC_VI"],
+            description: " sự mạnh mẽ trong công việc, khả năng thực hành tốt và kinh nghiệm dày dặn, giúp họ trở thành người dẫn dắt ý kiến trong lĩnh vực chuyên môn",
+            detailedDescription:[
+                "Sự kết hợp giữa Diên Niên, tượng trưng cho người mạnh mẽ, chủ động trong công việc nhưng khó tiếp thu ý kiến khác", 
+                "và Phục Vị, tượng trưng cho người thích ổn định và thụ động", 
+                "có thể tạo ra sự giằng co nội tâm và căng thẳng nếu gặp phải những thay đổi vượt quá khả năng.",
+                "mạnh mẽ trong công việc, khó tiếp thu ý kiến người khác trừ khi được chứng minh là tốt hơn ý kiến của họ",
+                "chủ động, không thích bị thúc giục, có khả năng thực hiện mục tiêu dứt khoát, là thành viên giá trị",
+                "khó chấp nhận những điều mới,"
+
+            ]
+        },
+        "PHUC_VI_PHUC_VI": {
+            stars: ["PHUC_VI", "PHUC_VI"],
+            description: "biểu thị trạng thái chờ đợi, ẩn mình, thận trọng quá mức dẫn đến lo lắng, do dự, bỏ lỡ cơ hội và khó chấp nhận thay đổi, tuy nhiên nó cũng mang lại sự kiên nhẫn, khả năng chịu đựng cô đơn và làm tốt các công việc lặp đi lặp lại, có thể dẫn đến thành công sau thời gian dài nỗ lực."
+        },
+        "HOA_HAI_PHUC_VI": {
+            stars: ["HOA_HAI", "PHUC_VI"],
+            description: "Họa Hại là tượng trưng cho khả năng hùng biện nhưng cũng dễ gây hấn. Khi kết hợp Phục Vị có nghĩa là tiếp tục",
+            detailedDescription:[
+                "thể hiện sự thận trọng ban đầu trong giao tiếp nhưng bộc lộ bản chất thật khi quen thuộc hoặc ở trong lĩnh vực chuyên môn",
+                "thường xuyên lo lắng về những gì mình nói ra và có xu hướng trì hoãn việc đưa ra quyết định cuối cùng",
+                "Từ trường này có tài hùng biện và ăn nói rất hay, nhưng cũng thường xuyên gây cãi vã vì những chuyện vụn vặt trong cuộc sống."
+
+            ]
+        },
+        "LUC_SAT_PHUC_VI": {
+            stars: ["LUC_SAT", "PHUC_VI"],
+            description: "Sự kết hợp giữa Lục Sát và Phục Vị tạo ra năng lượng thiếu quyết đoán, sợ khó khăn, làm việc theo cảm xúc, bảo thủ, hướng nội, thiếu an toàn và có xu hướng trì hoãn, đồng thời có thể tăng đào hoa ",
+            detailedDescription: [
+                "là tổ hợp sợ khó khăn nhất,khó đột phá trong sự nghiệp ",
+                "ai đó giới thiệu những điều, đường đi mới cho những người có năng lượng từ trường này thì những người có tổ hợp từ trường này sẽ từ chối",
+                "Phục Vị đi theo Lục Sát có nghĩa là đào hoa tiếp tục nên tạo ra nhiều đào hoa trong cuộc sống hơn tổ hợp khác. "
+            ]
+
+        },
+        "NGU_QUY_PHUC_VI": {
+            stars: ["NGU_QUY", "PHUC_VI"],
+            description: "Sự kết hợp giữa Ngũ Quỷ, tượng trưng cho người có nhiều ý tưởng và tính nghệ thuật, và Phục Vị, tượng trưng cho sự thụ động và thiếu an toàn, tạo ra người có nhiều ý tưởng nhưng khó thực hiện và thường hối tiếc, thích chờ đợi cơ hội.",
+            detailedDescription: [
+                "Phục Vị làm cho tư duy của Ngũ Quỷ trở nên sâu sắc, chi tiết và thận trọng hơn", 
+                "nhưng cần có năng lượng khác để vượt qua sự trì trệ của Phục Vị.",
+                "Tổ hợp này cũng liên quan đến các vấn đề về tim mạch và tuần hoàn máu.",
+            ]
+        },
+        "TUYET_MENH_PHUC_VI": {
+            stars: ["TUYET_MENH", "PHUC_VI"],
+            description: "Sự kết hợp giữa Tuyệt Mệnh, tượng trưng cho sự nhạy cảm, mạo hiểm nhưng cũng bướng bỉnh và hay đổ lỗi, với Phục Vị, tượng trưng cho sự bảo thủ, thận trọng và lo lắng, tạo xu hướng mất tiền, hành động bị động hơn nhưng cũng suy nghĩ kỹ lưỡng và có khả năng thỏa hiệp hơn."
+        },
+    
+        // Các sao khác với Họa Hại
+        "SINH_KHI_HOA_HAI": {
+            stars: ["SINH_KHI", "HOA_HAI"],
+            description: "Gặp quý nhân nhưng dễ mất tiền, thu nhập cao nhưng chi tiêu lớn.",
+        },
+        "THIEN_Y_HOA_HAI": {
+            stars: ["THIEN_Y", "HOA_HAI"],
+            description: "Tài lộc tốt nhưng dễ hao tiền, mọi người thích giao du nhưng tốn kém.",
+        },
+        "DIEN_NIEN_HOA_HAI": {
+            stars: ["DIEN_NIEN", "HOA_HAI"],
+            description: "Có khả năng chuyên môn tốt nhưng dễ tiêu tiền, nói nhiều, nên tập trung vào chất lượng."
+        },
+        "PHUC_VI_HOA_HAI": {
+            stars: ["PHUC_VI", "HOA_HAI"],
+            description: "nói cứng rắn, tự cho là đúng.",
+            detailedDescription:[
+                "đứng trước những người không quen biết nhiều, họ sẽ ít nói và sẵn sàng lắng nghe",
+                "nhưng một khi đứng trước những người bạn quen hay vào đúng chủ đề chuyên môn họ sẽ nói một cách kiên quyết",
+                "Hãy giữ lời nói cẩn thận trong tay của chính bạn."
+    
+            ]
+        },
+        "HOA_HAI_HOA_HAI": {
+            stars: ["HOA_HAI", "HOA_HAI"],
+            description: "Nói thẳng, chiêu cãi vã, cứng rắn, mạnh miệng, cãi lộn, tính khí nóng nảy, hụt hơi, không kiên nhẫn.",
+            detailedDescription:[
+                "có khả năng linh hoạt trong lời nói, giỏi tạo ra tình huống có lợi cho mình qua lời nói, đặc biệt về công việc và kinh doanh",
+                "mua bán hoặc tranh luận, thường dùng lời lẽ cay nghiệt để giành phần thắng, dễ gây tổn thương",
+                "tính khí nóng nảy, dễ cáu kỉnh, lời nói gay gắt, bộc lộ cảm xúc mà ít quan tâm đến người khác",
+                "có thể gây ra nhiều vấn đề sức khỏe như tích tụ độc tố, ốm yếu, tai nạn và làm cho thể trạng suy yếu theo thời gian",
+            ]
+        },
+        "LUC_SAT_HOA_HAI": {
+            stars: ["LUC_SAT", "HOA_HAI"],
+            description: "Hao tiền trong các mối quan hệ xã hội, chi tiêu nhiều cho giao tiếp, quan hệ."
+        },
+        "NGU_QUY_HOA_HAI": {
+            stars: ["NGU_QUY", "HOA_HAI"],
+            description: "Tư duy không ổn định và hay nói nhiều, dễ phát ngôn bừa bãi gây rắc rối."
+        },
+        "TUYET_MENH_HOA_HAI": {
+            stars: ["TUYET_MENH", "HOA_HAI"],
+            description: "Chi tiêu lớn và liều lĩnh, dễ mạo hiểm trong tài chính dẫn đến mất mát."
+        },
+    
+        // Các sao khác với Lục Sát
+        "SINH_KHI_LUC_SAT": {
+            stars: ["SINH_KHI", "LUC_SAT"],
+            description: "Được giúp đỡ trong lĩnh vực dịch vụ, quan hệ xã hội tốt nhưng cẩn thận người không tốt.",
+        },
+        "THIEN_Y_LUC_SAT": {
+            stars: ["THIEN_Y", "LUC_SAT"],
+            description: "Kiếm tiền tốt trong lĩnh vực dịch vụ, tình cảm tốt nhưng phải cẩn thận với mối quan hệ.",
+            detailedDescription: [
+                "Đặc điểm chính của từ trường này là sự giàu có tích cực",
+                "là người rộng lượng, không thù dai, có tư tưởng rộng rãi và sẽ không quan tâm những vấn đề tầm thường",
+                "Trong giao tiếp giữa các cá nhân, dễ xúc động, quá tốt bụng nên dễ bị tổn thương;",
+                "Không thiếu tiền nên không quan tâm đến tiền lắm, nếu không chú tâm sẽ bỏ lỡ cơ hội kiếm tiền.",
+                "Người có từ trường Thiên Y giỏi quan hệ, đào hoa tích cực",
+                "đường tình duyên của họ suôn sẻ hơn, gặp được bạn đời sẽ không khó, sẽ gặp được nhiều người phù hợp.",
+                "Vì đặc điểm này của đào hoa mạnh mẽ, mọi mối quan hệ đều sẽ ngọt ngào và tươi đẹp",
+                "nhưng cũng cần lưu ý không nên có nhiều từ trường Thiên Y trong dãy số, nếu không sẽ dễ xảy ra nhiều cuộc hôn nhân.",
+            ]
+        },
+        "DIEN_NIEN_LUC_SAT": {
+            stars: ["DIEN_NIEN", "LUC_SAT"],
+            description: "Thích hợp làm việc trong ngành dịch vụ, quan hệ khách hàng tốt, nhưng dễ bị lợi dụng."
+        },
+        "PHUC_VI_LUC_SAT": {
+            stars: ["PHUC_VI", "LUC_SAT"],
+            description: ""
+        },
+        "HOA_HAI_LUC_SAT": {
+            stars: ["HOA_HAI", "LUC_SAT"],
+            description: "Hao tiền trong các mối quan hệ xã hội, chi tiêu nhiều cho giao tiếp, quan hệ."
+        },
+        "LUC_SAT_LUC_SAT": {
+            stars: ["LUC_SAT", "LUC_SAT"],
+            description: ""
+        },
+        "NGU_QUY_LUC_SAT": {
+            stars: ["NGU_QUY", "LUC_SAT"],
+            description: "Đào hoa nát, dễ có mối quan hệ không rõ ràng, tình cảm phức tạp."
+        },
+        "TUYET_MENH_LUC_SAT": {
+            stars: ["TUYET_MENH", "LUC_SAT"],
+            description: "Mối quan hệ xã hội tốn kém, phải nỗ lực nhiều trong giao tiếp nhưng ít kết quả."
+        },
+    
+        // Các sao khác với Ngũ Quỷ
+        "SINH_KHI_NGU_QUY": {
+            stars: ["SINH_KHI", "NGU_QUY"],
+            description: "Có quý nhân nhưng tư duy không ổn định, dễ thay đổi, nên cẩn trọng với quyết định.",
+        },
+        "THIEN_Y_NGU_QUY": {
+            stars: ["THIEN_Y", "NGU_QUY"],
+            description: "Có tài chính nhưng không ổn định, tư duy hay thay đổi, dễ đầu tư mạo hiểm.",
+        },
+        "DIEN_NIEN_NGU_QUY": {
+            stars: ["DIEN_NIEN", "NGU_QUY"],
+            description: "Chuyên môn tốt nhưng tư duy không ổn định, dễ thay đổi công việc hoặc phương hướng."
+        },
+        "PHUC_VI_NGU_QUY": {
+            stars: ["PHUC_VI", "NGU_QUY"],
+            description: "chi tiết, thận trọng,học nhanh, đa nghi, thích cờ bạc",
+            detailedDescription:[
+                "học nhanh nhưng đa nghi, khó hòa đồng và không tin tưởng người khác",
+                "de thay đổi công việc và dựa vào ý tưởng cá nhân",
+                "không nên đầu tư mạo hiểm, thích cờ bạc, có may mắn nhưng tiền bạc đến và đi nhanh chóng",
+                "cần chú ý đến tim mạch và tuần hoàn máu",
+                "ve cảm xúc, dễ thiếu an toàn, thay đổi, bồn chồn và có nguy cơ ngoại tình, ảnh hưởng xấu đến các mối quan hệ",
+            ]
+        },
+        "HOA_HAI_NGU_QUY": {
+            stars: ["HOA_HAI", "NGU_QUY"],
+            description: "Tư duy không ổn định và hay nói nhiều, dễ phát ngôn bừa bãi gây rắc rối."
+        },
+        "LUC_SAT_NGU_QUY": {
+            stars: ["LUC_SAT", "NGU_QUY"],
+            description: "Đào hoa nát, dễ có mối quan hệ không rõ ràng, tình cảm phức tạp."
+        },
+        "NGU_QUY_NGU_QUY": {
+            stars: ["NGU_QUY", "NGU_QUY"],
+            description: "rất thông minh, tài giỏi và dễ đạt thành tựu trong công việc, không ổn định nhất , phản ứng nhanh lại gặp khó khăn trắc trở , không ổn định , ý nghĩ hay thay đổi ",
+            detailedDescription:[
+                "Họ có khả năng suy nghĩ tốt và thường đưa ra những ý kiến giá trị, giúp ích cho sự nghiệp.",
+                "Tuy nhiên, họ không phải là người điềm tĩnh và dễ bất mãn nếu không có cơ hội phát triển.",
+                "luôn hướng đến những mục tiêu và lý tưởng cao hơn, không thích sự trì trệ",
+                "Trong tình yêu, họ có xu hướng chủ động kết thúc mối quan hệ.",
+                "Tổ hợp này liên quan đến sự thay đổi, nhiều ý tưởng, thức khuya và các vấn đề về tim mạch, mạch máu não."
+            ]
+        },
+        "TUYET_MENH_NGU_QUY": {
+            stars: ["TUYET_MENH", "NGU_QUY"],
+            description: "Tư duy bất ổn và liều lĩnh, dễ đưa ra quyết định sai lầm, gây hậu quả nghiêm trọng."
+        },
+    
+        // Các sao khác với Tuyệt Mệnh
+        "SINH_KHI_TUYET_MENH": {
+            stars: ["SINH_KHI", "TUYET_MENH"],
+            description: "Gặp quý nhân trong lúc khó khăn, được giúp đỡ nhưng phải nỗ lực nhiều.",
+        },
+        "THIEN_Y_TUYET_MENH": {
+            stars: ["THIEN_Y", "TUYET_MENH"],
+            description: "Tiền bạc dễ đến nhưng cũng dễ mất, đầu tư nhiều nhưng phải cẩn trọng."
+        },
+        "DIEN_NIEN_TUYET_MENH": {
+            stars: ["DIEN_NIEN", "TUYET_MENH"],
+            description: "Có năng lực chuyên môn nhưng phải nỗ lực nhiều, dốc sức làm việc."
+        },
+        "PHUC_VI_TUYET_MENH": {
+            stars: ["PHUC_VI", "TUYET_MENH"],
+            description: ""
+        },
+        "HOA_HAI_TUYET_MENH": {
+            stars: ["HOA_HAI", "TUYET_MENH"],
+            description: "Chi tiêu lớn và liều lĩnh, dễ mạo hiểm trong tài chính dẫn đến mất mát."
+        },
+        "LUC_SAT_TUYET_MENH": {
+            stars: ["LUC_SAT", "TUYET_MENH"],
+            description: "Mối quan hệ xã hội tốn kém, phải nỗ lực nhiều trong giao tiếp nhưng ít kết quả."
+        },
+        "NGU_QUY_TUYET_MENH": {
+            stars: ["NGU_QUY", "TUYET_MENH"],
+            description: "Tư duy bất ổn và liều lĩnh, dễ đưa ra quyết định sai lầm, gây hậu quả nghiêm trọng."
+        },
+        "TUYET_MENH_TUYET_MENH": {
+            stars: ["TUYET_MENH", "TUYET_MENH"],
+            description: ""
+        }
         
     },
     
