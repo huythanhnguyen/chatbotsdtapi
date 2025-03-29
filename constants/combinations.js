@@ -23,7 +23,10 @@ const COMBINATION_INTERPRETATIONS = {
         },
         "PHUC_VI_SINH_KHI": {
             stars: ["PHUC_VI", "SINH_KHI"],
-            description: ""
+            description: "Phục Vị, chờ đợi và giữ nguyên vị trí, với Sinh Khí, tượng trưng cho người yêu đời, lạc quan và không vội vã, tạo ra người có xu hướng lười biếng, không nhiều tham vọng và thích sống hạnh phúc",
+            detailedDescription: [
+            "thường ở trạng thái thụ động, có thể đang chờ đợi sự giúp đỡ từ người khác. Tuy nhiên, tính cách lạc quan và vui vẻ của Sinh Khí giúp họ dễ kết bạn và gặp được quý nhân phù trợ."
+            ]
         },
         "HOA_HAI_SINH_KHI": {
             stars: ["HOA_HAI", "SINH_KHI"],
@@ -114,11 +117,23 @@ const COMBINATION_INTERPRETATIONS = {
         },
         "DIEN_NIEN_DIEN_NIEN": {
             stars: ["DIEN_NIEN", "DIEN_NIEN"],
-            description: ""
+            description: "Sự kết hợp hai lần Diên Niên có thể chỉ ra người có nhiều công việc hoặc nguồn thu nhập, đồng thời bướng bỉnh, không thích nghe lời khuyên nhưng giỏi quản lý tiền bạc.",
+            detailedDescription: [
+                "người chuyên nghiệp, có năng lực lãnh đạo và yêu cầu cao với bản thân,có tinh thần trách nhiệm cao ",
+                "dễ làm việc quá sức và gặp các vấn đề về sức khỏe như đau vai, cổ, mất ngủ.",
+                "Ở phụ nữ, năng lượng Diên Niên mạnh có thể tạo ra áp lực lên chồng và ảnh hưởng đến hôn nhân, trừ khi người chồng bao dung.",
+                " không biết lắng nghe ý kiến của người khác . Vì vậy , khả năng thích ứng của họ nhìn chung không mạnh lắm" , 
+                "vì vậy những người có nghề nghiệp đòi hỏi sự linh hoạt cần lưu ý tránh sử dụng từ trường Diên Niên quá nhiều "
+            ]
         },
         "PHUC_VI_DIEN_NIEN": {
             stars: ["PHUC_VI", "DIEN_NIEN"],
-            description: ""
+            description: "Sự kết hợp giữa Phục Vị và Diên Niên tạo ra người thận trọng nhưng luôn cố gắng hoàn hảo trong công việc",
+            detailedDescription :[
+                "Họ là người làm việc chăm chỉ, có trách nhiệm và luôn nỗ lực để đạt được sự hoàn hảo trong mọi việc. ",
+                "Về mặt tình cảm, họ chân thành và hết lòng với đối phương nhưng dễ bị tổn thương, đồng thời có thể gặp mâu thuẫn trong hôn nhân nếu không hòa hợp.",
+                "nhiều căng thẳng và các vấn đề sức khỏe liên quan đến vai, cổ, lưng dưới và giấc ngủ"
+            ]
         },
         "HOA_HAI_DIEN_NIEN": {
             stars: ["HOA_HAI", "DIEN_NIEN"],
@@ -283,7 +298,10 @@ const COMBINATION_INTERPRETATIONS = {
         },
         "PHUC_VI_LUC_SAT": {
             stars: ["PHUC_VI", "LUC_SAT"],
-            description: ""
+            description: "Khi Phục Vị kết hợp với Lục Sát, đặc điểm nổi bật nhất là họ sợ mọi thứ và không dám đối mặt với khó khăn.",
+            detailedDescription:[
+                "Sự kết hợp này có sức kháng cự rất lớn khi đối diện với điều mới."
+            ]
         },
         "HOA_HAI_LUC_SAT": {
             stars: ["HOA_HAI", "LUC_SAT"],
@@ -291,7 +309,14 @@ const COMBINATION_INTERPRETATIONS = {
         },
         "LUC_SAT_LUC_SAT": {
             stars: ["LUC_SAT", "LUC_SAT"],
-            description: ""
+            description: "Tăng cường cảm giác sa sút , khuynh hướng tự kỷ . Cảm xúc không ổn định , quan hệ kết nối lại đột nhiên chuyển biến xấu , Đào Hoa kiếp .",
+            detailedDescription:[
+                "Người có tổ hợp Lục Sát mạnh thông minh, giao tiếp tốt, muốn kiếm nhiều tiền nhưng khó giữ, thường gặp rắc rối và có các mối quan hệ không tốt.",
+                "Họ tinh tế, thận trọng, có khả năng quan sát tốt và dễ được người khác chấp nhận, nhờ đó mà hòa đồng.",
+                "họ giỏi giao tiếp, có nhiều mối quan hệ, thu thập được thông tin và nguồn lực.",
+                "Tuy nhiên, các mối quan hệ của họ thường có mục đích, và dù có mạng lưới rộng, kết quả lại do họ tự đánh giá, rủi ro lớn thường dẫn đến thất bại.",
+                "Khi năng lượng Lục Sát chồng chất, họ kiếm tiền bằng nhiều cách nhưng cuối cùng vẫn tiêu hết, gặp vấn đề trong hôn nhân và cảm thấy chán nản cả trong sự nghiệp lẫn tình cảm."
+            ]
         },
         "NGU_QUY_LUC_SAT": {
             stars: ["NGU_QUY", "LUC_SAT"],
@@ -365,23 +390,56 @@ const COMBINATION_INTERPRETATIONS = {
         },
         "PHUC_VI_TUYET_MENH": {
             stars: ["PHUC_VI", "TUYET_MENH"],
-            description: ""
+            description: "súc thế xung đông , không xung thì thôi , xông lên trừng thiên . Trong công việc rất liều ",
+            detailedDescription:[
+                "từ trường Phục Vị có thể triệt tiêu một phần năng lượng tiêu cực do từ trường Tuyệt Mệnh tạo ra",
+                "giúp chủ nhân con số lên kế hoạch thông minh và vững vàng , hành động từng bước , thận trọng mà dám chiến đấu , và có thể tránh được nhiều vấn đề rủi ro ."
+            ]
         },
         "HOA_HAI_TUYET_MENH": {
             stars: ["HOA_HAI", "TUYET_MENH"],
-            description: "Chi tiêu lớn và liều lĩnh, dễ mạo hiểm trong tài chính dẫn đến mất mát."
+            description: "Chi tiêu lớn và liều lĩnh, dễ mạo hiểm trong tài chính dẫn đến mất mát.",
+            detailedDescription:[
+                "Sự kết hợp của hai từ trường hung tinh này tạo ra người cứng rắn, Họa Hại không nhường nhịn về lời nói còn Tuyệt Mệnh thì hành động theo ý mình mà không hối hận.",
+                "Khi có tổ hợp này, cần cẩn thận tránh mâu thuẫn với người khác vì dễ mất kiểm soát, nói ra những điều không thể hàn gắn và sau đó hối hận,",
+                "đặc biệt cần suy nghĩ kỹ trước khi hành động ở nơi làm việc vì những người này rất nguy hiểm và khó kiểm soát cảm xúc."
+            ]
         },
         "LUC_SAT_TUYET_MENH": {
             stars: ["LUC_SAT", "TUYET_MENH"],
-            description: "Mối quan hệ xã hội tốn kém, phải nỗ lực nhiều trong giao tiếp nhưng ít kết quả."
+            description: "Mối quan hệ xã hội tốn kém, phải nỗ lực nhiều trong giao tiếp nhưng ít kết quả.",
+            detailedDescription:[
+                "Sự kết hợp giữa từ trường Lục Sát và Tuyệt Mệnh được xem là một trong những tổ hợp xấu nhất ",
+                "Từ trường Lục Sát mang đến sự mong manh và bất lực bên trong, dễ dẫn đến cảm xúc tiêu cực, và khi kết hợp với Tuyệt Mệnh, những cảm xúc này bộc lộ ra bên ngoài một cách khó kiểm soát.",
+                "Những người này thường nóng nảy, khó kiềm chế cảm xúc, dễ buồn bã và có thể hành động cực đoan khi tình yêu tan vỡ, đồng thời gặp nhiều mâu thuẫn trong giao tiếp. ",
+                "Về mặt gia đình, họ có xu hướng không hòa hợp, ít giao tiếp, và có thể có mức độ hoang tưởng, dẫn đến nhiều vụ ly hôn.",
+                "Trong chuyện tình cảm, họ dễ dàng chấp nhận mối quan hệ mà không suy nghĩ kỹ và không biết cách duy trì, đồng thời kém trong việc kiểm soát sự cô đơn và khó từ chối."
+            ]
         },
         "NGU_QUY_TUYET_MENH": {
             stars: ["NGU_QUY", "TUYET_MENH"],
-            description: "Tư duy bất ổn và liều lĩnh, dễ đưa ra quyết định sai lầm, gây hậu quả nghiêm trọng."
+            description: "Tư duy bất ổn và liều lĩnh, dễ đưa ra quyết định sai lầm, gây hậu quả nghiêm trọng.",
+            detailedDescription:[
+                "Tổ hợp Ngũ Quỷ + Tuyệt Mệnh trong số điện thoại mang ý nghĩa về sự thay đổi, nhiều ý tưởng, thức khuya",
+                " và các vấn đề sức khỏe liên quan đến tim, mạch máu não và gan thận, và gây tai nạn giao thông.",
+                "Những người có từ trường này thường tham vọng, không chấp nhận điều bình thường, có ý tưởng thất thường và cạnh tranh mạnh mẽ.",
+                "Sự kết hợp này có thể dẫn đến tiêu dùng bốc đồng, quyết định sai lầm trong sự nghiệp và dễ gặp các vấn đề pháp lý, đầu tư thua lỗ dẫn đến nợ nần.",
+                " Trong hôn nhân, họ có xu hướng hay thay đổi, bốc đồng, đa nghi và dễ gây bất hòa, thậm chí ly hôn, đặc biệt nếu tổ hợp này ở cuối số điện thoại.",
+                " Xét về năng lượng số, Ngũ Quỷ + Tuyệt Mệnh cho thấy sự dũng cảm, kỹ năng lập kế hoạch tốt, ham muốn kiếm tiền nhanh nhưng cũng tiêu tiền như nước, dễ thiếu kiên nhẫn"
+            ]
         },
         "TUYET_MENH_TUYET_MENH": {
             stars: ["TUYET_MENH", "TUYET_MENH"],
-            description: ""
+            description: "Sơ ý chủ quan , kích động , xung động , dễ đi đến cực đoan , dễ phá tài , không nên đánh bạc , không dễ quản lý tài sản .",
+            detailedDescription:[
+                "nhiều từ trường Tuyệt Mệnh thường có tính khí thất thường, thích mạo hiểm, dễ hành động cực đoan dẫn đến nợ nần và các mối quan hệ không tốt",
+                "Đặc trưng của Tuyệt Mệnh là sự phân cực trong suy nghĩ và hành động, khiến họ khó thay đổi nhưng lại làm việc trực tiếp, chăm chỉ và kiếm tiền nhanh chóng. ",
+                "Họ có xu hướng lựa chọn giữa công việc rủi ro thấp lợi nhuận thấp nhiều vất vả hoặc rủi ro cao lợi nhuận cao, với mục tiêu chính là kiếm tiền một cách đơn giản.",
+                " từ trường Tuyệt Mệnh thường làm những công việc đơn giản để kiếm tiền, đóng góp nguồn lực vật chất và tài chính tùy theo ngành nghề. ",
+                "Trong sự nghiệp, họ không thích bị gò bó, dễ phản kháng khi thấy bất công, thông minh nhưng dễ bị phát hiện, thích mạo hiểm và những công việc có rủi ro cao nhưng lợi nhuận lớn.",
+                " Trong mối quan hệ, họ thích gây bất ngờ nhưng mối quan hệ tốt cũng nhanh chóng nguội lạnh, bị coi là thực tế và không thích tương tác nhiều, hợp tác kinh doanh có thể tốt hơn. ",
+                "họ có thể bỏ qua chi tiết vì lợi ích trước mắt, dễ dẫn đến tranh chấp và dễ mắc nợ trong ngành rủi ro cao, nhưng lại khó khăn trong công việc ổn định, không có rủi ro"
+            ]
         }
         
     },

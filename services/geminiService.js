@@ -59,13 +59,15 @@ const generatePrompt = (type, data) => {
   switch (type) {
     case 'analysis':
       return `
-    Với tư cách là một chuyên gia xem số điện thoại năng lượng dày dạn kinh nghiệm, hãy phân tích số điện thoại ${data.phoneNumber} như một bản đồ năng lượng sao.
+    Với tư cách là một chuyên gia xem số điện thoại năng lượng dày dạn kinh nghiệm, hãy phân tích số điện thoại ${data.phoneNumber} như một bản đồ năng lượng.
     
-    Tổng hợp thông tin dưới đây thành một luận giải súc tích, thâm sâu, mạch lạc và huyền bí. Đảm bảo luận giải nhất quán, không mâu thuẫn và phản ánh đúng bản chất của số điện thoại này.
+    Tổng hợp thông tin dưới đây thành một luận giải súc tích, thâm sâu, mạch lạc. Đảm bảo luận giải nhất quán, không mâu thuẫn và phản ánh đúng bản chất của số điện thoại này.
     
     Mỗi ý luận giải phải viện dẫn nguồn gốc sao/cặp số và mức năng lượng của chúng. Sử dụng ngôn từ bat cuc linh so kết hợp với tâm lý học để diễn đạt trôi chảy như một vị thầy thực sự đang tư vấn.
 
     Hay noi so dien thoai nay dang the hien 
+
+
     
     Ưu tiên phân tích:
     - Ba số cuối và các tổ hợp đặc biệt (quan trọng nhất)
@@ -73,7 +75,6 @@ const generatePrompt = (type, data) => {
     - Cặp sao liền kề, đặc biệt là cặp cuối cùng
     - Tổ hợp có năng lượng tổng hợp cao
     - Các vị trí số đặc biệt
-    -Sao Hung dat canh sao Hung: the hien tinh xau của 2 sao.
     
     Phân tích theo các lĩnh vực sau đây bằng giọng điệu uyên thâm nhưng gần gũi:
     
