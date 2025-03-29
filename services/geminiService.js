@@ -73,7 +73,7 @@ const generatePrompt = (type, data) => {
     - Cặp sao liền kề, đặc biệt là cặp cuối cùng
     - Tổ hợp có năng lượng tổng hợp cao
     - Các vị trí số đặc biệt
-    -Sao Hung dat canh sao Hung ( bị gãy- broken): the hien tinh xau của 2 sao.
+    -Sao Hung dat canh sao Hung: the hien tinh xau của 2 sao.
     
     Phân tích theo các lĩnh vực sau đây bằng giọng điệu uyên thâm nhưng gần gũi:
     
@@ -86,7 +86,7 @@ const generatePrompt = (type, data) => {
     **6. Nhân duyên và Quý nhân**: Mối quan hệ xã hội, người trợ giúp, cách kết nối
     **7. Sức khỏe và Năng lượng sống**: Điểm cần chú ý về sức khỏe
     **8. Điểm lưu ý đặc biệt**: những vấn đề khác và  lời khuyên bổ sung
-    
+    Khi mo ta trong cac doan nay, dung ** de bold va xuong dong section, tranh dung * hoac ** de bold chu. chi bold cac section nhu ben tren. 
         
 
         # THÔNG TIN CHI TIẾT VỀ CÁC SAO
