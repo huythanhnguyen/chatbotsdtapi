@@ -25,6 +25,170 @@ const conversationHistory = new Map();
 const MAX_CONVERSATION_TURNS = 10;
 
 /**
+ * Dùng Gemini để phân tích ý định và trích xuất thông tin từ tin nhắn người dùng
+ * @param {string} userMessage - Tin nhắn từ người dùng
+ * @returns {Promise<object>} Kết quả phân tích tin nhắn
+ */
+async function analyzeUserIntent(userMessage) {
+  // Cấu trúc prompt dành riêng cho việc phân tích ý định
+  const intentAnalysisPrompt = `
+    Phân tích tin nhắn sau và trả về kết quả dưới dạng JSON:
+    "${userMessage}"
+    
+    Cần trích xuất các thông tin:
+    1. intent: Một trong các giá trị (ANALYZE_PHONE, FOLLOW_UP, COMPARE_PHONES, GENERAL_INFO, UNKNOWN)
+    2. phoneNumbers: Mảng các số điện thoại được tìm thấy (định dạng chuẩn, chỉ chứa chữ số)
+    3. mainQuestion: Câu hỏi chính của người dùng (nếu có)
+    
+    Quy tắc nhận diện ý định:
+    - ANALYZE_PHONE: Khi người dùng muốn phân tích một số điện thoại cụ thể
+    - FOLLOW_UP: Khi người dùng hỏi thêm về số đã phân tích hoặc hỏi về khía cạnh cụ thể
+    - COMPARE_PHONES: Khi người dùng muốn so sánh từ 2 số điện thoại trở lên
+    - GENERAL_INFO: Khi người dùng hỏi về phương pháp phân tích, thông tin chung
+    - UNKNOWN: Khi không xác định được ý định rõ ràng
+    
+    Với số điện thoại Việt Nam:
+    - Loại bỏ khoảng trắng, dấu chấm, dấu gạch ngang
+    - Đổi mã quốc tế +84/84 thành 0 nếu có
+    - Chỉ trả về các số có 10-11 chữ số và hợp lệ
+    
+    CHÚ Ý: Chỉ trả về JSON, không có bất kỳ nội dung nào khác.
+  `;
+
+  try {
+    // Sử dụng hàm callGeminiAPI đã có sẵn nhưng với nhiệt độ thấp để kết quả nhất quán
+    const response = await callGeminiAPI(intentAnalysisPrompt, {
+      temperature: 0.1,
+      maxTokens: 1000,
+      systemPrompt: getSystemPrompt()
+    });
+    
+    // Cố gắng tìm và trích xuất JSON từ phản hồi
+    try {
+      // Tìm kiếm chuỗi JSON trong phản hồi nếu có nội dung khác kèm theo
+      const jsonMatch = response.match(/\{[\s\S]*\}/);
+      const jsonStr = jsonMatch ? jsonMatch[0] : response;
+      
+      const result = JSON.parse(jsonStr);
+      
+      // Đảm bảo có các trường cần thiết
+      return {
+        intent: result.intent || 'UNKNOWN',
+        phoneNumbers: Array.isArray(result.phoneNumbers) ? result.phoneNumbers : [],
+        mainQuestion: result.mainQuestion || userMessage
+      };
+    } catch (parseError) {
+      console.error('Error parsing intent analysis response:', parseError);
+      console.log('Raw response:', response);
+      
+      // Fallback nếu không parse được JSON
+      return {
+        intent: 'UNKNOWN',
+        phoneNumbers: [],
+        mainQuestion: userMessage
+      };
+    }
+  } catch (error) {
+    console.error('Error calling Gemini for intent analysis:', error);
+    return {
+      intent: 'UNKNOWN',
+      phoneNumbers: [],
+      mainQuestion: userMessage
+    };
+  }
+}
+
+
+/**
+ * Xử lý tin nhắn đầu vào từ người dùng
+ * @param {string} message - Tin nhắn người dùng
+ * @param {string|null} userId - ID người dùng (nếu có)
+ * @returns {Promise<string>} Phản hồi cho người dùng
+ */
+exports.handleUserMessage = async (message, userId = null) => {
+  try {
+    // Phân tích ý định người dùng bằng Gemini
+    const analysis = await analyzeUserIntent(message);
+    
+    // Xử lý dựa trên ý định đã được phân tích
+    switch (analysis.intent) {
+      case 'ANALYZE_PHONE': {
+        // Kiểm tra xem có tìm thấy số điện thoại không
+        if (analysis.phoneNumbers && analysis.phoneNumbers.length > 0) {
+          const phoneNumber = analysis.phoneNumbers[0];
+          
+          // Sử dụng analysisService để phân tích số
+          const analysisData = await analysisService.analyzePhoneNumber(phoneNumber);
+          
+          // Lưu vào ngữ cảnh hội thoại
+          if (userId) {
+            conversationManager.saveCurrentPhone(userId, phoneNumber, analysisData);
+          }
+          
+          // Tạo phân tích chi tiết
+          return this.generateAnalysis(analysisData, userId);
+        } else {
+          return "Tôi không thể xác định số điện thoại từ tin nhắn của bạn. Vui lòng cung cấp số điện thoại rõ ràng (ví dụ: xem số 0912345678).";
+        }
+      }
+      
+      case 'COMPARE_PHONES': {
+        // So sánh nhiều số điện thoại
+        if (analysis.phoneNumbers && analysis.phoneNumbers.length >= 2) {
+          // Phân tích từng số điện thoại
+          const analysisDataList = await Promise.all(
+            analysis.phoneNumbers.map(phone => analysisService.analyzePhoneNumber(phone))
+          );
+          
+          // Tạo phân tích so sánh
+          return this.generateComparison(analysisDataList, userId);
+        } else {
+          return "Để thực hiện so sánh, tôi cần ít nhất 2 số điện thoại. Vui lòng cung cấp đầy đủ các số điện thoại cần so sánh.";
+        }
+      }
+      
+      case 'FOLLOW_UP': {
+        // Kiểm tra xem có ngữ cảnh trước đó không
+        if (userId) {
+          const phoneContext = conversationManager.getCurrentPhone(userId);
+          
+          if (phoneContext) {
+            // Có ngữ cảnh về số điện thoại -> xử lý follow-up
+            return this.generateFollowUpResponse(analysis.mainQuestion, userId, phoneContext.analysisData);
+          }
+        }
+        
+        // Không có ngữ cảnh -> xử lý như câu hỏi chung
+        return this.generateGeneralInfo(analysis.mainQuestion, userId);
+      }
+      
+      case 'GENERAL_INFO': {
+        // Xử lý câu hỏi chung về Bát Tinh
+        return this.generateGeneralInfo(analysis.mainQuestion, userId);
+      }
+      
+      default: {
+        // Kiểm tra xem có thể là câu hỏi follow-up không
+        if (userId) {
+          const phoneContext = conversationManager.getCurrentPhone(userId);
+          
+          if (phoneContext) {
+            // Có ngữ cảnh -> xử lý như follow-up
+            return this.generateFollowUpResponse(message, userId, phoneContext.analysisData);
+          }
+        }
+        
+        // Không xác định được ý định cụ thể và không có ngữ cảnh
+        return "Vui lòng cung cấp số điện thoại bạn muốn phân tích (ví dụ: phân tích số 0912345678) hoặc đặt câu hỏi cụ thể hơn về phương pháp phân tích Bát Tinh.";
+      }
+    }
+  } catch (error) {
+    console.error('Error handling user message:', error);
+    return 'Xin lỗi, đã xảy ra lỗi khi xử lý tin nhắn của bạn. Vui lòng thử lại sau.';
+  }
+};
+
+/**
  * Base system prompt for all requests
  */
 const getSystemPrompt = () => `
@@ -610,5 +774,10 @@ module.exports = {
   /**
    * Clear conversation history for a user
    */
-  clearConversation: (userId) => conversationManager.clear(userId)
+  clearConversation: (userId) => conversationManager.clear(userId),
+    // Thêm export mới
+    handleUserMessage: exports.handleUserMessage,
+  
+    // Cho phép truy cập trực tiếp các hàm phân tích nếu cần
+    analyzeUserIntent: analyzeUserIntent
 };

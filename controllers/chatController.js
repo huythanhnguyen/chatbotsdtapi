@@ -2,7 +2,31 @@
 const geminiService = require('../services/geminiService');
 const analysisService = require('../services/analysisService');
 const userService = require('../services/userService');
+// Ví dụ trong chatController.js hoặc file controller tương ứng
+const geminiService = require('../services/geminiService');
 
+// Xử lý tin nhắn chat
+exports.handleChatMessage = async (req, res) => {
+  try {
+    const { message } = req.body;
+    const userId = req.user ? req.user.id : null;
+    
+    // Sử dụng hàm mới để xử lý tin nhắn
+    const response = await geminiService.handleUserMessage(message, userId);
+    
+    return res.json({
+      success: true,
+      response
+    });
+  } catch (error) {
+    console.error('Chat message error:', error);
+    return res.status(500).json({
+      success: false,
+      message: 'Lỗi khi xử lý tin nhắn',
+      error: error.message
+    });
+  }
+};
 /**
  * Controller xử lý các tương tác chat và phân tích số điện thoại
  */
