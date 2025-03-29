@@ -126,11 +126,15 @@ exports.getAnalysisDetail = async (req, res) => {
     });
   }
 };
-// server/controllers/analysisController.js
+
+// Xử lý câu hỏi liên quan đến phân tích số điện thoại
 exports.askQuestion = async (req, res) => {
   try {
     const { phoneNumber, question, type = 'question', phoneNumbers } = req.body;
-    const userId = req.user ? req.user._id : null;
+    
+    // Đảm bảo userId luôn có giá trị hoặc null
+    const userId = req.user && req.user._id ? req.user._id : 
+                  (req.user && req.user.id ? req.user.id : null);
     
     console.log("Request data:", { phoneNumber, question, type, phoneNumbers, userId });
     
@@ -154,97 +158,297 @@ exports.askQuestion = async (req, res) => {
         
         console.log(`Comparing phone numbers: ${phoneNumbers.join(', ')}`);
         
-        // Phân tích từng số điện thoại
-        const analysisDataList = await Promise.all(
-          phoneNumbers.map(phone => analysisService.analyzePhoneNumber(phone))
-        );
-        
-        // So sánh các số điện thoại
-        const comparisonResponse = await geminiService.generateComparison(analysisDataList, userId);
-        
-        return res.status(200).json({
-          success: true,
-          analysis: {
-            answer: comparisonResponse,
-            phoneNumbers,
-            question,
-            type: 'comparison'
-          }
-        });
+        try {
+          // Phân tích từng số điện thoại
+          const analysisDataList = await Promise.all(
+            phoneNumbers.map(phone => analysisService.analyzePhoneNumber(phone))
+          );
+          
+          // So sánh các số điện thoại
+          const comparisonResponse = await geminiService.generateComparison(analysisDataList, userId);
+          
+          return res.status(200).json({
+            success: true,
+            analysis: {
+              answer: comparisonResponse,
+              phoneNumbers,
+              question,
+              type: 'comparison'
+            }
+          });
+        } catch (compareError) {
+          console.error('Error in phone comparison:', compareError);
+          // Thử xử lý câu hỏi như một câu hỏi chung
+          const fallbackResponse = await geminiService.generateGeneralInfo(question, userId);
+          return res.status(200).json({
+            success: true,
+            analysis: {
+              answer: fallbackResponse,
+              question,
+              type: 'general',
+              note: 'Chuyển sang câu hỏi chung do lỗi khi so sánh'
+            }
+          });
+        }
         
       case 'followup':
         // Xử lý câu hỏi theo dõi - dựa vào phân tích gần nhất
         console.log("Processing follow-up question");
         
-        // Nếu cung cấp số điện thoại, tìm phân tích của số đó
-        let followupRecord;
-        
-        if (phoneNumber) {
-          followupRecord = await Analysis.findOne({ 
-            phoneNumber,
-            userId
-          }).sort({ createdAt: -1 });
-        } else {
-          // Nếu không cung cấp số, tìm phân tích gần nhất
-          followupRecord = await Analysis.findOne({ userId }).sort({ createdAt: -1 });
-        }
-        
-        if (!followupRecord) {
-          console.log("No existing analysis found for follow-up");
-          return res.status(404).json({
-            success: false,
-            message: 'Không tìm thấy phân tích trước đó để trả lời câu hỏi. Vui lòng phân tích một số điện thoại trước.'
+        try {
+          // Nếu cung cấp số điện thoại, tìm phân tích của số đó
+          let followupRecord;
+          
+          if (phoneNumber) {
+            followupRecord = await Analysis.findOne({ 
+              phoneNumber: phoneNumber.replace(/\D/g, ''),
+              userId
+            }).sort({ createdAt: -1 });
+          } else {
+            // Nếu không cung cấp số, tìm phân tích gần nhất
+            followupRecord = await Analysis.findOne({ userId }).sort({ createdAt: -1 });
+          }
+          
+          if (!followupRecord) {
+            console.log("No existing analysis found for follow-up, switching to general question");
+            // Chuyển sang xử lý câu hỏi chung nếu không tìm thấy phân tích trước đó
+            const generalResponse = await geminiService.generateGeneralInfo(question, userId);
+            return res.status(200).json({
+              success: true,
+              analysis: {
+                answer: generalResponse,
+                question,
+                type: 'general',
+                note: 'Chuyển sang câu hỏi chung do không tìm thấy phân tích trước đó'
+              }
+            });
+          }
+          
+          console.log(`Using existing analysis for phone ${followupRecord.phoneNumber} for follow-up`);
+          
+          // Đảm bảo result tồn tại
+          if (!followupRecord.result) {
+            console.log("Analysis record is missing result property, using general response");
+            const generalResponse = await geminiService.generateGeneralInfo(question, userId);
+            return res.status(200).json({
+              success: true,
+              analysis: {
+                answer: generalResponse,
+                question,
+                type: 'general',
+                note: 'Chuyển sang câu hỏi chung do bản ghi phân tích thiếu thông tin'
+              }
+            });
+          }
+          
+          // Sử dụng phương thức follow-up response
+          const followUpResponse = await geminiService.generateFollowUpResponse(
+            question, 
+            userId, 
+            followupRecord.result
+          );
+          
+          return res.status(200).json({
+            success: true,
+            analysis: {
+              answer: followUpResponse,
+              phoneNumber: followupRecord.phoneNumber,
+              question,
+              type: 'followup'
+            }
+          });
+        } catch (followupError) {
+          console.error('Error in follow-up processing:', followupError);
+          // Thử xử lý câu hỏi như một câu hỏi chung
+          const fallbackResponse = await geminiService.generateGeneralInfo(question, userId);
+          return res.status(200).json({
+            success: true,
+            analysis: {
+              answer: fallbackResponse,
+              question,
+              type: 'general',
+              note: 'Chuyển sang câu hỏi chung do lỗi khi xử lý follow-up'
+            }
           });
         }
-        
-        console.log(`Using existing analysis for phone ${followupRecord.phoneNumber} for follow-up`);
-        
-        // Sử dụng phương thức follow-up response
-        const followUpResponse = await geminiService.generateFollowUpResponse(
-          question, 
-          userId, 
-          followupRecord.result
-        );
-        
-        return res.status(200).json({
-          success: true,
-          analysis: {
-            answer: followUpResponse,
-            phoneNumber: followupRecord.phoneNumber,
-            question,
-            type: 'followup'
-          }
-        });
         
       case 'general':
         // Xử lý câu hỏi chung, không liên quan đến số điện thoại cụ thể
         console.log("Processing general question about numerology");
         
-        const generalResponse = await geminiService.generateGeneralInfo(question, userId);
-        
-        return res.status(200).json({
-          success: true,
-          analysis: {
-            answer: generalResponse,
-            question,
-            type: 'general'
-          }
-        });
+        try {
+          const generalResponse = await geminiService.generateGeneralInfo(question, userId);
+          
+          return res.status(200).json({
+            success: true,
+            analysis: {
+              answer: generalResponse,
+              question,
+              type: 'general'
+            }
+          });
+        } catch (generalError) {
+          console.error('Error processing general question:', generalError);
+          return res.status(500).json({
+            success: false,
+            message: 'Lỗi khi xử lý câu hỏi chung',
+            error: generalError.message
+          });
+        }
         
       case 'question':
       default:
         // Xử lý câu hỏi về một số điện thoại cụ thể (mặc định)
-        
-        // Xử lý khi không có số điện thoại trong request
-        if (!phoneNumber) {
-          console.log("No phone number provided for question, using most recent analysis");
+        try {
+          // Xử lý khi không có số điện thoại trong request
+          if (!phoneNumber) {
+            console.log("No phone number provided for question, using most recent analysis");
+            
+            // Tìm phân tích gần nhất của người dùng
+            const latestAnalysisRecord = userId ? 
+              await Analysis.findOne({ userId }).sort({ createdAt: -1 }) : null;
+            
+            if (!latestAnalysisRecord) {
+              // Nếu không có phân tích nào, xử lý như câu hỏi chung
+              console.log("No existing analysis found, treating as general question");
+              const fallbackResponse = await geminiService.generateGeneralInfo(question, userId);
+              
+              return res.status(200).json({
+                success: true,
+                analysis: {
+                  answer: fallbackResponse,
+                  question,
+                  type: 'general',
+                  note: 'Chuyển sang câu hỏi chung do không tìm thấy phân tích trước đó'
+                }
+              });
+            }
+            
+            // Sử dụng phân tích gần nhất
+            console.log(`Using most recent analysis for phone ${latestAnalysisRecord.phoneNumber}`);
+            
+            // Kiểm tra xem có thuộc tính result không
+            if (!latestAnalysisRecord.result) {
+              console.log("Analysis record is missing result property, using general response");
+              const fallbackResponse = await geminiService.generateGeneralInfo(question, userId);
+              
+              return res.status(200).json({
+                success: true,
+                analysis: {
+                  answer: fallbackResponse,
+                  question,
+                  type: 'general',
+                  note: 'Chuyển sang câu hỏi chung do bản ghi phân tích thiếu thông tin'
+                }
+              });
+            }
+            
+            const recentQuestionResponse = await geminiService.generateResponse(
+              question, 
+              latestAnalysisRecord.result, 
+              userId
+            );
+            
+            return res.status(200).json({
+              success: true,
+              analysis: {
+                answer: recentQuestionResponse,
+                phoneNumber: latestAnalysisRecord.phoneNumber,
+                question,
+                type: 'question'
+              }
+            });
+          }
           
-          // Tìm phân tích gần nhất của người dùng
-          const latestAnalysisRecord = await Analysis.findOne({ userId }).sort({ createdAt: -1 });
+          // Tìm phân tích cho số điện thoại cụ thể
+          const cleanPhoneNumber = phoneNumber.replace(/\D/g, '');
+          const existingAnalysisRecord = userId ? 
+            await Analysis.findOne({ 
+              phoneNumber: cleanPhoneNumber,
+              userId
+            }).sort({ createdAt: -1 }) : null;
           
-          if (!latestAnalysisRecord) {
-            // Nếu không có phân tích nào, xử lý như câu hỏi chung
-            console.log("No existing analysis found, treating as general question");
+          if (!existingAnalysisRecord) {
+            console.log(`No existing analysis found for phone ${cleanPhoneNumber}, creating new analysis`);
+            // Thực hiện phân tích mới nếu không tìm thấy
+            const analysisData = await analysisService.analyzePhoneNumber(cleanPhoneNumber);
+            
+            // Nếu user đã đăng nhập, lưu phân tích vào CSDL
+            if (userId) {
+              // Tạo bản ghi phân tích mới
+              const newAnalysis = new Analysis({
+                userId,
+                phoneNumber: cleanPhoneNumber,
+                result: analysisData
+              });
+              
+              await newAnalysis.save();
+              console.log(`Created new analysis for phone ${cleanPhoneNumber}`);
+            }
+            
+            const newAnalysisResponse = await geminiService.generateResponse(question, analysisData, userId);
+            
+            return res.status(200).json({
+              success: true,
+              analysis: {
+                answer: newAnalysisResponse,
+                phoneNumber: cleanPhoneNumber,
+                question,
+                isNewAnalysis: true,
+                type: 'question'
+              }
+            });
+          }
+          
+          console.log(`Found existing analysis for phone ${cleanPhoneNumber}, generating response`);
+          
+          // Kiểm tra xem có thuộc tính result không
+          if (!existingAnalysisRecord.result) {
+            console.log("Analysis record is missing result property, creating new analysis");
+            
+            // Thực hiện phân tích mới
+            const newAnalysisData = await analysisService.analyzePhoneNumber(cleanPhoneNumber);
+            
+            // Cập nhật bản ghi hiện có nếu có userId
+            if (userId) {
+              existingAnalysisRecord.result = newAnalysisData;
+              await existingAnalysisRecord.save();
+              console.log(`Updated analysis for phone ${cleanPhoneNumber}`);
+            }
+            
+            const newResponse = await geminiService.generateResponse(question, newAnalysisData, userId);
+            
+            return res.status(200).json({
+              success: true,
+              analysis: {
+                answer: newResponse,
+                phoneNumber: cleanPhoneNumber,
+                question,
+                isUpdatedAnalysis: true,
+                type: 'question'
+              }
+            });
+          }
+          
+          // Sử dụng GeminiService để tạo phản hồi
+          const questionResponse = await geminiService.generateResponse(question, existingAnalysisRecord.result, userId);
+          
+          // Trả về kết quả
+          return res.status(200).json({
+            success: true,
+            analysis: {
+              answer: questionResponse,
+              phoneNumber: cleanPhoneNumber,
+              question,
+              type: 'question'
+            }
+          });
+        } catch (questionError) {
+          console.error('Error processing question about phone number:', questionError);
+          
+          // Thử xử lý câu hỏi như một câu hỏi chung
+          try {
+            console.log("Falling back to general question handling");
             const fallbackResponse = await geminiService.generateGeneralInfo(question, userId);
             
             return res.status(200).json({
@@ -252,109 +456,49 @@ exports.askQuestion = async (req, res) => {
               analysis: {
                 answer: fallbackResponse,
                 question,
-                type: 'general'
+                type: 'general',
+                note: 'Chuyển sang câu hỏi chung do lỗi khi xử lý câu hỏi về số điện thoại'
               }
             });
-          }
-          
-          // Sử dụng phân tích gần nhất
-          console.log(`Using most recent analysis for phone ${latestAnalysisRecord.phoneNumber}`);
-          
-          // Kiểm tra xem có thuộc tính result không
-          if (!latestAnalysisRecord.result) {
-            console.error("Analysis record is missing result property:", latestAnalysisRecord);
+          } catch (fallbackError) {
+            console.error('Error in fallback processing:', fallbackError);
             return res.status(500).json({
               success: false,
-              message: 'Lỗi: Dữ liệu phân tích thiếu thông tin cần thiết'
+              message: 'Lỗi khi xử lý câu hỏi và không thể sử dụng phương án dự phòng',
+              error: questionError.message
             });
           }
-          
-          const recentQuestionResponse = await geminiService.generateResponse(
-            question, 
-            latestAnalysisRecord.result, 
-            userId
-          );
-          
-          return res.status(200).json({
-            success: true,
-            analysis: {
-              answer: recentQuestionResponse,
-              phoneNumber: latestAnalysisRecord.phoneNumber,
-              question,
-              type: 'question'
-            }
-          });
         }
-        
-        // Tìm phân tích cho số điện thoại cụ thể
-        const existingAnalysisRecord = await Analysis.findOne({ 
-          phoneNumber,
-          userId
-        }).sort({ createdAt: -1 });
-        
-        if (!existingAnalysisRecord) {
-          console.log(`No existing analysis found for phone ${phoneNumber}, creating new analysis`);
-          // Thực hiện phân tích mới nếu không tìm thấy
-          const analysisData = await analysisService.analyzePhoneNumber(phoneNumber);
-          
-          // Tạo bản ghi phân tích mới
-          const newAnalysis = new Analysis({
-            userId,
-            phoneNumber,
-            result: analysisData
-          });
-          
-          await newAnalysis.save();
-          console.log(`Created new analysis for phone ${phoneNumber}`);
-          
-          const newAnalysisResponse = await geminiService.generateResponse(question, analysisData, userId);
-          
-          return res.status(200).json({
-            success: true,
-            analysis: {
-              answer: newAnalysisResponse,
-              phoneNumber,
-              question,
-              isNewAnalysis: true,
-              type: 'question'
-            }
-          });
-        }
-        
-        console.log(`Found existing analysis for phone ${phoneNumber}, generating response`);
-        
-        // Kiểm tra xem có thuộc tính result không
-        if (!existingAnalysisRecord.result) {
-          console.error("Analysis record is missing result property:", existingAnalysisRecord);
-          return res.status(500).json({
-            success: false,
-            message: 'Lỗi: Dữ liệu phân tích thiếu thông tin cần thiết'
-          });
-        }
-        
-        // Sử dụng GeminiService để tạo phản hồi
-        const questionResponse = await geminiService.generateResponse(question, existingAnalysisRecord.result, userId);
-        
-        // Trả về kết quả
-        return res.status(200).json({
-          success: true,
-          analysis: {
-            answer: questionResponse,
-            phoneNumber,
-            question,
-            type: 'question'
-          }
-        });
     }
   } catch (error) {
     console.error('Error processing question:', error);
     console.error(error.stack); // Log stack trace
-    return res.status(500).json({
-      success: false,
-      message: 'Lỗi xử lý câu hỏi',
-      error: error.message,
-      stack: process.env.NODE_ENV === 'development' ? error.stack : undefined
-    });
+    
+    // Cố gắng trả về một phản hồi chung nếu có lỗi
+    try {
+      const generalResponse = await geminiService.generateGeneralInfo(
+        req.body.question || "Vui lòng cho tôi biết về chiêm tinh học số", 
+        req.user?.id || req.user?._id || null
+      );
+      
+      return res.status(200).json({
+        success: true,
+        analysis: {
+          answer: generalResponse,
+          question: req.body.question || "Không có câu hỏi cụ thể",
+          type: 'general',
+          note: 'Đã xảy ra lỗi khi xử lý câu hỏi ban đầu, đây là phản hồi chung'
+        }
+      });
+    } catch (fallbackError) {
+      // Nếu cả phương án dự phòng cũng thất bại, trả về lỗi
+      return res.status(500).json({
+        success: false,
+        message: 'Lỗi xử lý câu hỏi',
+        error: error.message,
+        stack: process.env.NODE_ENV === 'development' ? error.stack : undefined
+      });
+    }
   }
 };
 
