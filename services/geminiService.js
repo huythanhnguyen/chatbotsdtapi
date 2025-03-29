@@ -262,90 +262,207 @@ const conversationManager = {
  */
 exports.handleUserMessage = async (message, userId = null) => {
   try {
-    logger.info(`Received message from user ${userId || 'anonymous'}:`, { message });
+    console.log("====== HANDLE USER MESSAGE START ======");
+    console.log("Input message:", message);
+    console.log("User ID:", userId);
     
     // Phân tích ý định người dùng
     const analysis = await analyzeUserIntent(message);
+    console.log("Intent analysis:", JSON.stringify(analysis, null, 2));
     
-    // Log kết quả phân tích để debug
-    if (config.DEBUG) {
-      console.log('User intent analysis:', analysis);
+    // Log phone numbers
+    if (analysis.phoneNumbers && analysis.phoneNumbers.length > 0) {
+      console.log("Extracted phone numbers:", analysis.phoneNumbers);
+    } else {
+      console.log("No phone numbers extracted");
     }
     
     // Xử lý dựa trên ý định đã được phân tích
+    console.log("Processing intent:", analysis.intent);
+    
+    let response = ""; // Biến lưu phản hồi
+    
     switch (analysis.intent) {
       case 'ANALYZE_PHONE': {
+        // Record start time
+        const startTime = Date.now();
+        
         // Kiểm tra xem có tìm thấy số điện thoại không
         if (analysis.phoneNumbers && analysis.phoneNumbers.length > 0) {
           const phoneNumber = analysis.phoneNumbers[0];
+          console.log(`Processing phone number: ${phoneNumber}`);
           
-          // Sử dụng analysisService để phân tích số
-          const analysisData = await analysisService.analyzePhoneNumber(phoneNumber);
-          
-          // Lưu vào ngữ cảnh hội thoại
-          if (userId) {
-            conversationManager.saveCurrentPhone(userId, phoneNumber, analysisData);
+          try {
+            // Sử dụng analysisService để phân tích số
+            const analysisData = await analysisService.analyzePhoneNumber(phoneNumber);
+            console.log("Analysis data structure keys:", Object.keys(analysisData));
+            
+            // Kiểm tra lỗi trong kết quả phân tích
+            if (analysisData.error) {
+              console.log("Analysis returned error:", analysisData.error);
+              return `Không thể phân tích số điện thoại: ${analysisData.error}`;
+            }
+            
+            // Xác nhận dữ liệu phân tích có đầy đủ
+            console.log("Analysis contains starSequence:", 
+              !!analysisData.starSequence, 
+              "Length:", analysisData.starSequence ? analysisData.starSequence.length : 0
+            );
+            
+            // Lưu vào ngữ cảnh hội thoại
+            if (userId) {
+              console.log(`Saving phone context for user ${userId}`);
+              conversationManager.saveCurrentPhone(userId, phoneNumber, analysisData);
+            }
+            
+            // Tạo phân tích chi tiết
+            console.log("Generating analysis via generateAnalysis()");
+            response = await this.generateAnalysis(analysisData, userId);
+            console.log(`Generated analysis in ${Date.now() - startTime}ms, length: ${response.length}`);
+          } catch (analysisError) {
+            console.error("Error during phone analysis:", analysisError);
+            console.error(analysisError.stack);
+            response = "Rất tiếc, đã xảy ra lỗi khi phân tích số điện thoại. Vui lòng thử lại sau.";
           }
-          
-          // Tạo phân tích chi tiết
-          return this.generateAnalysis(analysisData, userId);
         } else {
-          return "Tôi không thể xác định số điện thoại từ tin nhắn của bạn. Vui lòng cung cấp số điện thoại rõ ràng (ví dụ: xem số 0912345678).";
+          console.log("No phone numbers found in message");
+          response = "Tôi không thể xác định số điện thoại từ tin nhắn của bạn. Vui lòng cung cấp số điện thoại rõ ràng (ví dụ: xem số 0912345678).";
         }
+        break;
       }
       
       case 'COMPARE_PHONES': {
         // So sánh nhiều số điện thoại
         if (analysis.phoneNumbers && analysis.phoneNumbers.length >= 2) {
-          // Phân tích từng số điện thoại
-          const analysisDataList = await Promise.all(
-            analysis.phoneNumbers.map(phone => analysisService.analyzePhoneNumber(phone))
-          );
-          
-          // Tạo phân tích so sánh
-          return this.generateComparison(analysisDataList, userId);
+          console.log(`Comparing ${analysis.phoneNumbers.length} phone numbers`);
+          try {
+            // Phân tích từng số điện thoại
+            const analysisDataList = await Promise.all(
+              analysis.phoneNumbers.map(phone => analysisService.analyzePhoneNumber(phone))
+            );
+            
+            // Kiểm tra dữ liệu phân tích
+            console.log("Analysis data list length:", analysisDataList.length);
+            const hasErrors = analysisDataList.some(data => data.error);
+            if (hasErrors) {
+              const errors = analysisDataList
+                .filter(data => data.error)
+                .map(data => data.error)
+                .join(", ");
+              console.log("Error in phone analysis:", errors);
+              return `Không thể phân tích một số số điện thoại: ${errors}`;
+            }
+            
+            // Tạo phân tích so sánh
+            console.log("Generating comparison analysis");
+            response = await this.generateComparison(analysisDataList, userId);
+            console.log(`Generated comparison, response length: ${response.length}`);
+          } catch (error) {
+            console.error("Error during comparison:", error);
+            console.error(error.stack);
+            response = "Rất tiếc, đã xảy ra lỗi khi so sánh các số điện thoại. Vui lòng thử lại sau.";
+          }
         } else {
-          return "Để thực hiện so sánh, tôi cần ít nhất 2 số điện thoại. Vui lòng cung cấp đầy đủ các số điện thoại cần so sánh.";
+          console.log("Not enough phone numbers for comparison");
+          response = "Để thực hiện so sánh, tôi cần ít nhất 2 số điện thoại. Vui lòng cung cấp đầy đủ các số điện thoại cần so sánh.";
         }
+        break;
       }
       
       case 'FOLLOW_UP': {
         // Kiểm tra xem có ngữ cảnh trước đó không
+        console.log("Processing follow-up question");
         if (userId) {
           const phoneContext = conversationManager.getCurrentPhone(userId);
           
           if (phoneContext) {
+            console.log(`Found context for phone ${phoneContext.phoneNumber}`);
             // Có ngữ cảnh về số điện thoại -> xử lý follow-up
-            return this.generateFollowUpResponse(analysis.mainQuestion, userId, phoneContext.analysisData);
+            try {
+              response = await this.generateFollowUpResponse(analysis.mainQuestion, userId, phoneContext.analysisData);
+              console.log(`Generated follow-up response, length: ${response.length}`);
+            } catch (error) {
+              console.error("Error generating follow-up response:", error);
+              console.error(error.stack);
+              response = "Rất tiếc, đã xảy ra lỗi khi xử lý câu hỏi tiếp theo. Vui lòng thử lại sau.";
+            }
+          } else {
+            console.log("No phone context found for user");
+            // Không có ngữ cảnh -> xử lý như câu hỏi chung
+            try {
+              response = await this.generateGeneralInfo(analysis.mainQuestion, userId);
+              console.log(`Generated general info response, length: ${response.length}`);
+            } catch (error) {
+              console.error("Error generating general info:", error);
+              console.error(error.stack);
+              response = "Rất tiếc, đã xảy ra lỗi khi xử lý câu hỏi. Vui lòng thử lại sau.";
+            }
+          }
+        } else {
+          console.log("No user ID provided for context lookup");
+          // Không có user ID -> xử lý như câu hỏi chung
+          try {
+            response = await this.generateGeneralInfo(analysis.mainQuestion, null);
+            console.log(`Generated general info response, length: ${response.length}`);
+          } catch (error) {
+            console.error("Error generating general info:", error);
+            console.error(error.stack);
+            response = "Rất tiếc, đã xảy ra lỗi khi xử lý câu hỏi. Vui lòng thử lại sau.";
           }
         }
-        
-        // Không có ngữ cảnh -> xử lý như câu hỏi chung
-        return this.generateGeneralInfo(analysis.mainQuestion, userId);
+        break;
       }
       
       case 'GENERAL_INFO': {
         // Xử lý câu hỏi chung về Bát Tinh
-        return this.generateGeneralInfo(analysis.mainQuestion, userId);
+        console.log("Processing general info question");
+        try {
+          response = await this.generateGeneralInfo(analysis.mainQuestion, userId);
+          console.log(`Generated general info response, length: ${response.length}`);
+        } catch (error) {
+          console.error("Error generating general info:", error);
+          console.error(error.stack);
+          response = "Rất tiếc, đã xảy ra lỗi khi xử lý câu hỏi. Vui lòng thử lại sau.";
+        }
+        break;
       }
       
       default: {
+        console.log("Processing undefined intent as possible follow-up");
         // Kiểm tra xem có thể là câu hỏi follow-up không
         if (userId) {
           const phoneContext = conversationManager.getCurrentPhone(userId);
           
           if (phoneContext) {
+            console.log(`Using existing context for phone ${phoneContext.phoneNumber}`);
             // Có ngữ cảnh -> xử lý như follow-up
-            return this.generateFollowUpResponse(message, userId, phoneContext.analysisData);
+            try {
+              response = await this.generateFollowUpResponse(message, userId, phoneContext.analysisData);
+              console.log(`Generated follow-up response, length: ${response.length}`);
+            } catch (error) {
+              console.error("Error generating follow-up response:", error);
+              console.error(error.stack);
+              response = "Rất tiếc, đã xảy ra lỗi khi xử lý câu hỏi tiếp theo. Vui lòng thử lại sau.";
+            }
+          } else {
+            console.log("No context found, treating as new request");
+            // Không xác định được ý định cụ thể và không có ngữ cảnh
+            response = "Vui lòng cung cấp số điện thoại bạn muốn phân tích (ví dụ: phân tích số 0912345678) hoặc đặt câu hỏi cụ thể hơn về phương pháp phân tích Bát Tinh.";
           }
+        } else {
+          console.log("No user ID, treating as new request");
+          response = "Vui lòng cung cấp số điện thoại bạn muốn phân tích (ví dụ: phân tích số 0912345678) hoặc đặt câu hỏi cụ thể hơn về phương pháp phân tích Bát Tinh.";
         }
-        
-        // Không xác định được ý định cụ thể và không có ngữ cảnh
-        return "Vui lòng cung cấp số điện thoại bạn muốn phân tích (ví dụ: phân tích số 0912345678) hoặc đặt câu hỏi cụ thể hơn về phương pháp phân tích Bát Tinh.";
       }
     }
+    
+    console.log("Final response type:", typeof response);
+    console.log("Response preview:", response.substring(0, 100) + "...");
+    console.log("====== HANDLE USER MESSAGE END ======");
+    return response;
   } catch (error) {
     console.error('Error handling user message:', error);
+    console.error(error.stack);
     return 'Xin lỗi, đã xảy ra lỗi khi xử lý tin nhắn của bạn. Vui lòng thử lại sau.';
   }
 };
@@ -471,9 +588,13 @@ const generatePrompt = (type, data) => {
 
               `;
       
-    case 'question':
-      const formattedPhone = data.analysisContext?.phoneNumber?.replace(/(\d{4})(\d{3})(\d{3})/, '$1 $2 $3') || '';
-      
+// Trong hàm generatePrompt, case 'question':
+case 'question':
+  const formattedPhone = data.analysisContext?.phoneNumber?.replace(/(\d{4})(\d{3})(\d{3})/, '$1 $2 $3') || '';
+  
+  // Kiểm tra data và data.starSequence
+  const hasStarSequence = data && data.starSequence && Array.isArray(data.starSequence);
+
       return `
     Với tư cách là một chuyên gia xem số điện thoại năng lượng dày dạn kinh nghiệm, hãy trả lời câu hỏi về số ${formattedPhone}: "${data.question}"
     
@@ -649,7 +770,7 @@ const callGeminiAPI = async (prompt, options = {}) => {
     promptLength: prompt.length,
     promptPreview: prompt.substring(0, 200) + '...'
   });
-  
+
   // API call with retry logic
   const makeApiCall = async (attempt = 1) => {
     try {
