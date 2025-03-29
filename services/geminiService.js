@@ -329,7 +329,18 @@ const conversationManager = {
       const msg = history[i];
       if (msg.role === 'user' && msg.content.startsWith('CONTEXT_DATA:')) {
         try {
-          const contextData = JSON.parse(history[i+1].content);
+          // Log the content for debugging
+          console.log('Found CONTEXT_DATA message, next message content type:', typeof history[i+1].content);
+          
+          // Try to parse the next message as JSON
+          let contextData;
+          if (typeof history[i+1].content === 'string') {
+            contextData = JSON.parse(history[i+1].content);
+          } else {
+            contextData = history[i+1].content; // It might already be an object
+          }
+          
+          console.log('Context data parsed successfully:', Boolean(contextData.analysisData));
           return contextData.analysisData;
         } catch (error) {
           console.error('Error parsing context data:', error);
@@ -337,6 +348,8 @@ const conversationManager = {
         }
       }
     }
+    
+    console.log('No CONTEXT_DATA message found in history of length', history.length);
     return null;
   }
 };
@@ -514,8 +527,11 @@ const geminiService = {
         analysisData: analysisData
       };
       
-      const contextMessage = JSON.stringify(userContext);
-      conversationManager.save(userId, `CONTEXT_DATA: ${analysisData.phoneNumber}`, contextMessage);
+      // Log what we're saving to make debugging easier
+      console.log(`Saving analysis context for phone ${analysisData.phoneNumber}`);
+      
+      // Store it directly as an object rather than stringifying
+      conversationManager.save(userId, `CONTEXT_DATA: ${analysisData.phoneNumber}`, userContext);
     }
     
     return response;
@@ -549,12 +565,24 @@ const geminiService = {
     // Get context from history if not provided
     if (!analysisData) {
       analysisData = conversationManager.getContextFromHistory(userId);
+      console.log('Retrieved analysis data from history:', analysisData ? 'Found' : 'Not found');
     }
     
     // If we have analysis data, use it for detailed context
     if (analysisData) {
-      // Create a rich context prompt with all analysis details
-      const prompt = generatePrompt('followUp', question);
+      // Create a rich context prompt with the analysis data
+      // Using the question prompt type which includes analysis data
+      const prompt = generatePrompt('question', {
+        question,
+        starSequence: analysisData.starSequence,
+        keyCombinations: analysisData.keyCombinations,
+        dangerousCombinations: analysisData.dangerousCombinations,
+        keyPositions: analysisData.keyPositions,
+        last3DigitsAnalysis: analysisData.last3DigitsAnalysis,
+        analysisContext: analysisData
+      });
+      
+      console.log('Using analysis data for phone', analysisData.phoneNumber, 'to generate response');
       
       return callGeminiAPI(prompt, {
         temperature: 0.7,
@@ -563,6 +591,7 @@ const geminiService = {
       });
     } else {
       // Use basic follow-up prompt if no specific context available
+      console.log('No analysis data available, using basic follow-up prompt');
       const prompt = generatePrompt('followUp', question);
       
       return callGeminiAPI(prompt, {
