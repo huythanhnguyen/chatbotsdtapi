@@ -1,6 +1,5 @@
 // server/services/geminiService.js
 const axios = require('axios');
-const analysisService = require('./analysisService');
 
 /**
  * Service for interacting with Google's Gemini API
@@ -19,453 +18,11 @@ const config = {
   CACHE_DURATION: 30* 24 * 60 * 60 * 1000,
   DEBUG: process.env.NODE_ENV === 'development'
 };
-// Thêm hàm logger ở đầu file
-const logger = {
-  debug: (message, data) => {
-    if (config.DEBUG) {
-      console.log(`[DEBUG] ${message}`);
-      if (data) console.log(JSON.stringify(data, null, 2));
-    }
-  },
-  error: (message, error) => {
-    console.error(`[ERROR] ${message}`);
-    if (error) {
-      console.error(error.message);
-      if (error.stack) console.error(error.stack);
-    }
-  },
-  info: (message, data) => {
-    console.log(`[INFO] ${message}`);
-    if (data) console.log(JSON.stringify(data, null, 2));
-  }
-};
 
 // Cache and conversation tracking
 const responseCache = new Map();
 const conversationHistory = new Map();
 const MAX_CONVERSATION_TURNS = 10;
-
-// Lưu trữ ngữ cảnh số điện thoại cho mỗi người dùng
-const phoneContexts = new Map();
-
-/**
- * Trích xuất số điện thoại từ văn bản bằng regex
- * @param {string} text - Văn bản cần trích xuất
- * @returns {Array} Mảng các số điện thoại tìm thấy
- */
-function extractPhoneNumbersFromText(text) {
-  // Regex để trích xuất số điện thoại Việt Nam (cả có dấu và không dấu)
-  const phoneRegex = /(?:0|\+84|84)[-.\s]?(\d{2,3})[-.\s]?(\d{3,4})[-.\s]?(\d{3,4})/g;
-  const matches = [];
-  let match;
-  
-  while ((match = phoneRegex.exec(text)) !== null) {
-    // Ghép các nhóm và loại bỏ ký tự không phải số
-    let phone = match[0].replace(/\D/g, '');
-    
-    // Chuyển đổi +84/84 thành 0
-    if (phone.startsWith('84')) {
-      phone = '0' + phone.substring(2);
-    }
-    
-    // Đảm bảo độ dài hợp lệ (10-11 số)
-    if (phone.length >= 10 && phone.length <= 11) {
-      matches.push(phone);
-    }
-  }
-  
-  return matches;
-}
-
-/**
- * Dùng Gemini để phân tích ý định và trích xuất thông tin từ tin nhắn người dùng
- * @param {string} userMessage - Tin nhắn từ người dùng
- * @returns {Promise<object>} Kết quả phân tích tin nhắn
- */
-async function analyzeUserIntent(userMessage) {
-  // Trích xuất số điện thoại bằng regex trước
-  const extractedNumbers = extractPhoneNumbersFromText(userMessage);
-  
-  // Cấu trúc prompt dành riêng cho việc phân tích ý định
-  const intentAnalysisPrompt = `
-    Phân tích tin nhắn sau và trả về kết quả dưới dạng JSON:
-    "${userMessage}"
-    
-    Cần trích xuất các thông tin:
-    1. intent: Một trong các giá trị (ANALYZE_PHONE, FOLLOW_UP, COMPARE_PHONES, GENERAL_INFO, UNKNOWN)
-    2. phoneNumbers: Mảng các số điện thoại được tìm thấy (định dạng chuẩn, chỉ chứa chữ số)
-    3. mainQuestion: Câu hỏi chính của người dùng (nếu có)
-    
-    Quy tắc nhận diện ý định:
-    - ANALYZE_PHONE: Khi người dùng muốn phân tích một số điện thoại cụ thể
-    - FOLLOW_UP: Khi người dùng hỏi thêm về số đã phân tích hoặc hỏi về khía cạnh cụ thể
-    - COMPARE_PHONES: Khi người dùng muốn so sánh từ 2 số điện thoại trở lên
-    - GENERAL_INFO: Khi người dùng hỏi về phương pháp phân tích, thông tin chung
-    - UNKNOWN: Khi không xác định được ý định rõ ràng
-    
-    Với số điện thoại Việt Nam:
-    - Loại bỏ khoảng trắng, dấu chấm, dấu gạch ngang
-    - Đổi mã quốc tế +84/84 thành 0 nếu có
-    - Chỉ trả về các số có 10-11 chữ số và hợp lệ
-    
-    CHÚ Ý: Chỉ trả về JSON, không có bất kỳ nội dung nào khác.
-  `;
-
-  try {
-    // Sử dụng hàm callGeminiAPI với nhiệt độ thấp để kết quả nhất quán
-    const response = await callGeminiAPI(intentAnalysisPrompt, {
-      temperature: 0.1,
-      maxTokens: 1000, 
-      systemPrompt: getSystemPrompt()
-    });
-    
-    try {
-      // Tìm kiếm chuỗi JSON trong phản hồi
-      const jsonMatch = response.match(/\{[\s\S]*\}/);
-      const jsonStr = jsonMatch ? jsonMatch[0] : response;
-      
-      const result = JSON.parse(jsonStr);
-      
-      // Kết hợp kết quả regex và Gemini API
-      // Nếu Gemini tìm được số điện thoại, sử dụng kết quả đó
-      // Nếu không, sử dụng kết quả từ regex
-      const phoneNumbers = Array.isArray(result.phoneNumbers) && result.phoneNumbers.length > 0 
-        ? result.phoneNumbers 
-        : extractedNumbers;
-        
-      // Xác định intent dựa trên kết quả phân tích
-      let intent = result.intent || 'UNKNOWN';
-      
-      // Nếu có số điện thoại nhưng intent là UNKNOWN, đặt thành ANALYZE_PHONE
-      if (intent === 'UNKNOWN' && phoneNumbers.length > 0) {
-        intent = 'ANALYZE_PHONE';
-      }
-      
-      return {
-        intent: intent,
-        phoneNumbers: phoneNumbers,
-        mainQuestion: result.mainQuestion || userMessage
-      };
-    } catch (parseError) {
-      console.error('Error parsing intent analysis response:', parseError);
-      
-      // Fallback khi không parse được JSON
-      return {
-        intent: extractedNumbers.length > 0 ? 'ANALYZE_PHONE' : 'UNKNOWN',
-        phoneNumbers: extractedNumbers,
-        mainQuestion: userMessage
-      };
-    }
-  } catch (error) {
-    console.error('Error calling Gemini for intent analysis:', error);
-    
-    // Fallback khi gọi API lỗi
-    return {
-      intent: extractedNumbers.length > 0 ? 'ANALYZE_PHONE' : 'UNKNOWN',
-      phoneNumbers: extractedNumbers,
-      mainQuestion: userMessage
-    };
-  }
-}
-
-/**
- * Quản lý ngữ cảnh số điện thoại
- */
-const conversationManager = {
-  // Các phương thức hiện có
-  save: (userId, userMessage, aiResponse) => {
-    if (!userId) return;
-    
-    if (!conversationHistory.has(userId)) {
-      conversationHistory.set(userId, []);
-    }
-    
-    const userHistory = conversationHistory.get(userId);
-    
-    userHistory.push(
-      { role: 'user', content: userMessage },
-      { role: 'model', content: aiResponse }
-    );
-    
-    // Keep history within MAX_CONVERSATION_TURNS limit
-    if (userHistory.length > MAX_CONVERSATION_TURNS * 2) {
-      userHistory.splice(0, 2);
-    }
-    
-    conversationHistory.set(userId, userHistory);
-  },
-  
-  get: (userId) => conversationHistory.get(userId) || [],
-  
-  clear: (userId) => {
-    conversationHistory.delete(userId);
-    phoneContexts.delete(userId);
-  },
-  
-  hasActiveConversation: (userId) => conversationHistory.has(userId) && conversationHistory.get(userId).length > 0,
-  
-  // Thêm các phương thức mới để quản lý ngữ cảnh số điện thoại
-  saveCurrentPhone: (userId, phoneNumber, analysisData) => {
-    if (!userId) return;
-    
-    if (!phoneContexts.has(userId)) {
-      phoneContexts.set(userId, new Map());
-    }
-    
-    const userContext = phoneContexts.get(userId);
-    userContext.set('currentPhone', {
-      phoneNumber,
-      analysisData,
-      timestamp: Date.now()
-    });
-  },
-  
-  getCurrentPhone: (userId) => {
-    if (!userId || !phoneContexts.has(userId)) return null;
-    
-    return phoneContexts.get(userId).get('currentPhone');
-  },
-  
-  // Get analysis context from history
-  getContextFromHistory: (userId) => {
-    if (!userId || !conversationHistory.has(userId)) return null;
-    
-    // Ưu tiên lấy từ phoneContexts trước
-    const phoneContext = conversationManager.getCurrentPhone(userId);
-    if (phoneContext) {
-      return phoneContext.analysisData;
-    }
-    
-    // Nếu không có, thử tìm trong lịch sử hội thoại
-    const history = conversationHistory.get(userId);
-    for (let i = 0; i < history.length; i++) {
-      const msg = history[i];
-      if (msg.role === 'user' && msg.content.startsWith('CONTEXT_DATA:')) {
-        try {
-          const contextData = JSON.parse(history[i+1].content);
-          return contextData.analysisData;
-        } catch (error) {
-          console.error('Error parsing context data:', error);
-          return null;
-        }
-      }
-    }
-    return null;
-  }
-};
-
-/**
- * Xử lý tin nhắn đầu vào từ người dùng
- * @param {string} message - Tin nhắn người dùng
- * @param {string|null} userId - ID người dùng (nếu có)
- * @returns {Promise<string>} Phản hồi cho người dùng
- */
-exports.handleUserMessage = async (message, userId = null) => {
-  try {
-    console.log("====== HANDLE USER MESSAGE START ======");
-    console.log("Input message:", message);
-    console.log("User ID:", userId);
-    
-    // Phân tích ý định người dùng
-    const analysis = await analyzeUserIntent(message);
-    console.log("Intent analysis:", JSON.stringify(analysis, null, 2));
-    
-    // Log phone numbers
-    if (analysis.phoneNumbers && analysis.phoneNumbers.length > 0) {
-      console.log("Extracted phone numbers:", analysis.phoneNumbers);
-    } else {
-      console.log("No phone numbers extracted");
-    }
-    
-    // Xử lý dựa trên ý định đã được phân tích
-    console.log("Processing intent:", analysis.intent);
-    
-    let response = ""; // Biến lưu phản hồi
-    
-    switch (analysis.intent) {
-      case 'ANALYZE_PHONE': {
-        // Record start time
-        const startTime = Date.now();
-        
-        // Kiểm tra xem có tìm thấy số điện thoại không
-        if (analysis.phoneNumbers && analysis.phoneNumbers.length > 0) {
-          const phoneNumber = analysis.phoneNumbers[0];
-          console.log(`Processing phone number: ${phoneNumber}`);
-          
-          try {
-            // Sử dụng analysisService để phân tích số
-            const analysisData = await analysisService.analyzePhoneNumber(phoneNumber);
-            console.log("Analysis data structure keys:", Object.keys(analysisData));
-            
-            // Kiểm tra lỗi trong kết quả phân tích
-            if (analysisData.error) {
-              console.log("Analysis returned error:", analysisData.error);
-              return `Không thể phân tích số điện thoại: ${analysisData.error}`;
-            }
-            
-            // Xác nhận dữ liệu phân tích có đầy đủ
-            console.log("Analysis contains starSequence:", 
-              !!analysisData.starSequence, 
-              "Length:", analysisData.starSequence ? analysisData.starSequence.length : 0
-            );
-            
-            // Lưu vào ngữ cảnh hội thoại
-            if (userId) {
-              console.log(`Saving phone context for user ${userId}`);
-              conversationManager.saveCurrentPhone(userId, phoneNumber, analysisData);
-            }
-            
-            // Tạo phân tích chi tiết
-            console.log("Generating analysis via generateAnalysis()");
-            response = await exports.generateAnalysis(analysisData, userId);
-            console.log(`Generated analysis in ${Date.now() - startTime}ms, length: ${response.length}`);
-          } catch (analysisError) {
-            console.error("Error during phone analysis:", analysisError);
-            console.error(analysisError.stack);
-            response = "Rất tiếc, đã xảy ra lỗi khi phân tích số điện thoại. Vui lòng thử lại sau.";
-          }
-        } else {
-          console.log("No phone numbers found in message");
-          response = "Tôi không thể xác định số điện thoại từ tin nhắn của bạn. Vui lòng cung cấp số điện thoại rõ ràng (ví dụ: xem số 0912345678).";
-        }
-        break;
-      }
-      
-      case 'COMPARE_PHONES': {
-        // So sánh nhiều số điện thoại
-        if (analysis.phoneNumbers && analysis.phoneNumbers.length >= 2) {
-          console.log(`Comparing ${analysis.phoneNumbers.length} phone numbers`);
-          try {
-            // Phân tích từng số điện thoại
-            const analysisDataList = await Promise.all(
-              analysis.phoneNumbers.map(phone => analysisService.analyzePhoneNumber(phone))
-            );
-            
-            // Kiểm tra dữ liệu phân tích
-            console.log("Analysis data list length:", analysisDataList.length);
-            const hasErrors = analysisDataList.some(data => data.error);
-            if (hasErrors) {
-              const errors = analysisDataList
-                .filter(data => data.error)
-                .map(data => data.error)
-                .join(", ");
-              console.log("Error in phone analysis:", errors);
-              return `Không thể phân tích một số số điện thoại: ${errors}`;
-            }
-            
-            // Tạo phân tích so sánh
-            console.log("Generating comparison analysis");
-            response = await exports.generateComparison(analysisDataList, userId);
-            console.log(`Generated comparison, response length: ${response.length}`);
-          } catch (error) {
-            console.error("Error during comparison:", error);
-            console.error(error.stack);
-            response = "Rất tiếc, đã xảy ra lỗi khi so sánh các số điện thoại. Vui lòng thử lại sau.";
-          }
-        } else {
-          console.log("Not enough phone numbers for comparison");
-          response = "Để thực hiện so sánh, tôi cần ít nhất 2 số điện thoại. Vui lòng cung cấp đầy đủ các số điện thoại cần so sánh.";
-        }
-        break;
-      }
-      
-      case 'FOLLOW_UP': {
-        // Kiểm tra xem có ngữ cảnh trước đó không
-        console.log("Processing follow-up question");
-        if (userId) {
-          const phoneContext = conversationManager.getCurrentPhone(userId);
-          
-          if (phoneContext) {
-            console.log(`Found context for phone ${phoneContext.phoneNumber}`);
-            // Có ngữ cảnh về số điện thoại -> xử lý follow-up
-            try {
-              response = await exports.generateFollowUpResponse(analysis.mainQuestion, userId, phoneContext.analysisData);
-              console.log(`Generated follow-up response, length: ${response.length}`);
-            } catch (error) {
-              console.error("Error generating follow-up response:", error);
-              console.error(error.stack);
-              response = "Rất tiếc, đã xảy ra lỗi khi xử lý câu hỏi tiếp theo. Vui lòng thử lại sau.";
-            }
-          } else {
-            console.log("No phone context found for user");
-            // Không có ngữ cảnh -> xử lý như câu hỏi chung
-            try {
-              response = await exports.generateGeneralInfo(analysis.mainQuestion, userId);
-              console.log(`Generated general info response, length: ${response.length}`);
-            } catch (error) {
-              console.error("Error generating general info:", error);
-              console.error(error.stack);
-              response = "Rất tiếc, đã xảy ra lỗi khi xử lý câu hỏi. Vui lòng thử lại sau.";
-            }
-          }
-        } else {
-          console.log("No user ID provided for context lookup");
-          // Không có user ID -> xử lý như câu hỏi chung
-          try {
-            response = await exports.generateGeneralInfo(analysis.mainQuestion, null);
-            console.log(`Generated general info response, length: ${response.length}`);
-          } catch (error) {
-            console.error("Error generating general info:", error);
-            console.error(error.stack);
-            response = "Rất tiếc, đã xảy ra lỗi khi xử lý câu hỏi. Vui lòng thử lại sau.";
-          }
-        }
-        break;
-      }
-      
-      case 'GENERAL_INFO': {
-        // Xử lý câu hỏi chung về Bát Tinh
-        console.log("Processing general info question");
-        try {
-          response = await exports.generateGeneralInfo(analysis.mainQuestion, userId);
-          console.log(`Generated general info response, length: ${response.length}`);
-        } catch (error) {
-          console.error("Error generating general info:", error);
-          console.error(error.stack);
-          response = "Rất tiếc, đã xảy ra lỗi khi xử lý câu hỏi. Vui lòng thử lại sau.";
-        }
-        break;
-      }
-      
-      default: {
-        console.log("Processing undefined intent as possible follow-up");
-        // Kiểm tra xem có thể là câu hỏi follow-up không
-        if (userId) {
-          const phoneContext = conversationManager.getCurrentPhone(userId);
-          
-          if (phoneContext) {
-            console.log(`Using existing context for phone ${phoneContext.phoneNumber}`);
-            // Có ngữ cảnh -> xử lý như follow-up
-            try {
-              response = await exports.generateFollowUpResponse(message, userId, phoneContext.analysisData);
-              console.log(`Generated follow-up response, length: ${response.length}`);
-            } catch (error) {
-              console.error("Error generating follow-up response:", error);
-              console.error(error.stack);
-              response = "Rất tiếc, đã xảy ra lỗi khi xử lý câu hỏi tiếp theo. Vui lòng thử lại sau.";
-            }
-          } else {
-            console.log("No context found, treating as new request");
-            // Không xác định được ý định cụ thể và không có ngữ cảnh
-            response = "Vui lòng cung cấp số điện thoại bạn muốn phân tích (ví dụ: phân tích số 0912345678) hoặc đặt câu hỏi cụ thể hơn về phương pháp phân tích Bát Tinh.";
-          }
-        } else {
-          console.log("No user ID, treating as new request");
-          response = "Vui lòng cung cấp số điện thoại bạn muốn phân tích (ví dụ: phân tích số 0912345678) hoặc đặt câu hỏi cụ thể hơn về phương pháp phân tích Bát Tinh.";
-        }
-      }
-    }
-    
-    console.log("Final response type:", typeof response);
-    console.log("Response preview:", response.substring(0, 100) + "...");
-    console.log("====== HANDLE USER MESSAGE END ======");
-    return response;
-  } catch (error) {
-    console.error('Error handling user message:', error);
-    console.error(error.stack);
-    return 'Xin lỗi, đã xảy ra lỗi khi xử lý tin nhắn của bạn. Vui lòng thử lại sau.';
-  }
-};
 
 /**
  * Base system prompt for all requests
@@ -588,13 +145,9 @@ const generatePrompt = (type, data) => {
 
               `;
       
-// Trong hàm generatePrompt, case 'question':
-case 'question':
-  const formattedPhone = data.analysisContext?.phoneNumber?.replace(/(\d{4})(\d{3})(\d{3})/, '$1 $2 $3') || '';
-  
-  // Kiểm tra data và data.starSequence
-  const hasStarSequence = data && data.starSequence && Array.isArray(data.starSequence);
-
+    case 'question':
+      const formattedPhone = data.analysisContext?.phoneNumber?.replace(/(\d{4})(\d{3})(\d{3})/, '$1 $2 $3') || '';
+      
       return `
     Với tư cách là một chuyên gia xem số điện thoại năng lượng dày dạn kinh nghiệm, hãy trả lời câu hỏi về số ${formattedPhone}: "${data.question}"
     
@@ -692,14 +245,11 @@ case 'question':
         
         Cuối cùng, cho biết số nào phù hợp nhất cho mỗi khía cạnh và số nào tốt nhất nói chung.
       `;
-      
-      if (config.DEBUG) {
-        console.log('\n========= GENERATED COMPARISON PROMPT =========');
-        console.log(prompt);
-        console.log('===================================\n');
-      }
-      
-      return prompt;
+        // Log prompt được tạo ra
+    console.log('\n========= GENERATED PROMPT =========');
+    console.log(prompt);
+    console.log('===================================\n');
+        return prompt;
       
     case 'general':
       return `
@@ -739,6 +289,59 @@ case 'question':
 };
 
 /**
+ * Manage conversation history
+ */
+const conversationManager = {
+  save: (userId, userMessage, aiResponse) => {
+    if (!userId) return;
+    
+    if (!conversationHistory.has(userId)) {
+      conversationHistory.set(userId, []);
+    }
+    
+    const userHistory = conversationHistory.get(userId);
+    
+    userHistory.push(
+      { role: 'user', content: userMessage },
+      { role: 'model', content: aiResponse }
+    );
+    
+    // Keep history within MAX_CONVERSATION_TURNS limit
+    if (userHistory.length > MAX_CONVERSATION_TURNS * 2) {
+      userHistory.splice(0, 2);
+    }
+    
+    conversationHistory.set(userId, userHistory);
+  },
+  
+  get: (userId) => conversationHistory.get(userId) || [],
+  
+  clear: (userId) => conversationHistory.delete(userId),
+  
+  hasActiveConversation: (userId) => conversationHistory.has(userId) && conversationHistory.get(userId).length > 0,
+  
+  // Get analysis context from history
+  getContextFromHistory: (userId) => {
+    if (!userId || !conversationHistory.has(userId)) return null;
+    
+    const history = conversationHistory.get(userId);
+    for (let i = 0; i < history.length; i++) {
+      const msg = history[i];
+      if (msg.role === 'user' && msg.content.startsWith('CONTEXT_DATA:')) {
+        try {
+          const contextData = JSON.parse(history[i+1].content);
+          return contextData.analysisData;
+        } catch (error) {
+          console.error('Error parsing context data:', error);
+          return null;
+        }
+      }
+    }
+    return null;
+  }
+};
+
+/**
  * Call the Gemini API with error handling and retries
  */
 const callGeminiAPI = async (prompt, options = {}) => {
@@ -761,15 +364,6 @@ const callGeminiAPI = async (prompt, options = {}) => {
     }
     responseCache.delete(cacheKey);
   }
-  // Thêm log chi tiết trước khi gọi API
-  logger.debug('Calling Gemini API with options:', { 
-    temperature, 
-    maxTokens, 
-    useCache, 
-    useHistory,
-    promptLength: prompt.length,
-    promptPreview: prompt.substring(0, 200) + '...'
-  });
 
   // API call with retry logic
   const makeApiCall = async (attempt = 1) => {
@@ -815,9 +409,8 @@ const callGeminiAPI = async (prompt, options = {}) => {
         console.log(`Prompt length: ${prompt.length} characters`);
         console.log(`Using history: ${useHistory}, History length: ${useHistory && userId ? (conversationManager.get(userId).length / 2) : 0} turns`);
         console.log(`\n=============== PROMPT CONTENT ===============`);
-        console.log(prompt.substring(0, 500) + '...'); // Hiển thị phần đầu của prompt
-        console.log(`\n=============== END PROMPT CONTENT ===============\n`);
-      }
+        console.log(prompt); // Hiển thị toàn bộ nội dung prompt
+        console.log(`\n=============== END PROMPT CONTENT ===============\n`);      }
       
       const response = await axios.post(apiUrl, requestBody, {
         headers: { 'Content-Type': 'application/json' },
@@ -884,8 +477,8 @@ const callGeminiAPI = async (prompt, options = {}) => {
   return makeApiCall();
 };
 
-// Export public methods
-module.exports = {
+// Create the service object with all the functions
+const geminiService = {
   /**
    * Initialize the service with custom configuration
    */
@@ -915,10 +508,6 @@ module.exports = {
     
     // Save analysis context for future questions
     if (userId) {
-      // Lưu ngữ cảnh vào phoneContexts
-      conversationManager.saveCurrentPhone(userId, analysisData.phoneNumber, analysisData);
-      
-      // Lưu thêm vào lịch sử hội thoại để tương thích với code cũ
       const userContext = {
         phoneNumber: analysisData.phoneNumber,
         analysis: response,
@@ -935,10 +524,10 @@ module.exports = {
   /**
    * Generate response to a specific question about a phone number
    */
-  generateResponse: async (question, analysisData, userId = null) => {
+  generateResponse: async (question, analysisContext, userId = null) => {
     const prompt = generatePrompt('question', {
       question,
-      analysisData
+      analysisContext
     });
     
     return callGeminiAPI(prompt, { 
@@ -954,7 +543,7 @@ module.exports = {
   generateFollowUpResponse: async (question, userId, analysisData = null) => {
     // If no history or user ID, treat as a general question
     if (!userId || !conversationManager.hasActiveConversation(userId)) {
-      return exports.generateGeneralInfo(question, userId);
+      return geminiService.generateGeneralInfo(question, userId);
     }
     
     // Get context from history if not provided
@@ -965,10 +554,7 @@ module.exports = {
     // If we have analysis data, use it for detailed context
     if (analysisData) {
       // Create a rich context prompt with all analysis details
-      const prompt = generatePrompt('question', {
-        question: question,
-        analysisData: analysisData
-      });
+      const prompt = generatePrompt('followUp', question);
       
       return callGeminiAPI(prompt, {
         temperature: 0.7,
@@ -1019,12 +605,8 @@ module.exports = {
   /**
    * Clear conversation history for a user
    */
-  clearConversation: (userId) => conversationManager.clear(userId),
-  
-  // Export các hàm phân tích cho việc testing
-  analyzeUserIntent,
-  extractPhoneNumbersFromText,
-  
-  // Export hàm xử lý tin nhắn
-  handleUserMessage: exports.handleUserMessage
+  clearConversation: (userId) => conversationManager.clear(userId)
 };
+
+// Export the service
+module.exports = geminiService;
