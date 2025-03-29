@@ -1,5 +1,6 @@
 // server/services/geminiService.js
 const axios = require('axios');
+const analysisService = require('./analysisService');
 
 /**
  * Service for interacting with Google's Gemini API
@@ -24,12 +25,47 @@ const responseCache = new Map();
 const conversationHistory = new Map();
 const MAX_CONVERSATION_TURNS = 10;
 
+// Lưu trữ ngữ cảnh số điện thoại cho mỗi người dùng
+const phoneContexts = new Map();
+
+/**
+ * Trích xuất số điện thoại từ văn bản bằng regex
+ * @param {string} text - Văn bản cần trích xuất
+ * @returns {Array} Mảng các số điện thoại tìm thấy
+ */
+function extractPhoneNumbersFromText(text) {
+  // Regex để trích xuất số điện thoại Việt Nam (cả có dấu và không dấu)
+  const phoneRegex = /(?:0|\+84|84)[-.\s]?(\d{2,3})[-.\s]?(\d{3,4})[-.\s]?(\d{3,4})/g;
+  const matches = [];
+  let match;
+  
+  while ((match = phoneRegex.exec(text)) !== null) {
+    // Ghép các nhóm và loại bỏ ký tự không phải số
+    let phone = match[0].replace(/\D/g, '');
+    
+    // Chuyển đổi +84/84 thành 0
+    if (phone.startsWith('84')) {
+      phone = '0' + phone.substring(2);
+    }
+    
+    // Đảm bảo độ dài hợp lệ (10-11 số)
+    if (phone.length >= 10 && phone.length <= 11) {
+      matches.push(phone);
+    }
+  }
+  
+  return matches;
+}
+
 /**
  * Dùng Gemini để phân tích ý định và trích xuất thông tin từ tin nhắn người dùng
  * @param {string} userMessage - Tin nhắn từ người dùng
  * @returns {Promise<object>} Kết quả phân tích tin nhắn
  */
 async function analyzeUserIntent(userMessage) {
+  // Trích xuất số điện thoại bằng regex trước
+  const extractedNumbers = extractPhoneNumbersFromText(userMessage);
+  
   // Cấu trúc prompt dành riêng cho việc phân tích ý định
   const intentAnalysisPrompt = `
     Phân tích tin nhắn sau và trả về kết quả dưới dạng JSON:
@@ -56,48 +92,147 @@ async function analyzeUserIntent(userMessage) {
   `;
 
   try {
-    // Sử dụng hàm callGeminiAPI đã có sẵn nhưng với nhiệt độ thấp để kết quả nhất quán
+    // Sử dụng hàm callGeminiAPI với nhiệt độ thấp để kết quả nhất quán
     const response = await callGeminiAPI(intentAnalysisPrompt, {
       temperature: 0.1,
-      maxTokens: 1000,
+      maxTokens: 1000, 
       systemPrompt: getSystemPrompt()
     });
     
-    // Cố gắng tìm và trích xuất JSON từ phản hồi
     try {
-      // Tìm kiếm chuỗi JSON trong phản hồi nếu có nội dung khác kèm theo
+      // Tìm kiếm chuỗi JSON trong phản hồi
       const jsonMatch = response.match(/\{[\s\S]*\}/);
       const jsonStr = jsonMatch ? jsonMatch[0] : response;
       
       const result = JSON.parse(jsonStr);
       
-      // Đảm bảo có các trường cần thiết
+      // Kết hợp kết quả regex và Gemini API
+      // Nếu Gemini tìm được số điện thoại, sử dụng kết quả đó
+      // Nếu không, sử dụng kết quả từ regex
+      const phoneNumbers = Array.isArray(result.phoneNumbers) && result.phoneNumbers.length > 0 
+        ? result.phoneNumbers 
+        : extractedNumbers;
+        
+      // Xác định intent dựa trên kết quả phân tích
+      let intent = result.intent || 'UNKNOWN';
+      
+      // Nếu có số điện thoại nhưng intent là UNKNOWN, đặt thành ANALYZE_PHONE
+      if (intent === 'UNKNOWN' && phoneNumbers.length > 0) {
+        intent = 'ANALYZE_PHONE';
+      }
+      
       return {
-        intent: result.intent || 'UNKNOWN',
-        phoneNumbers: Array.isArray(result.phoneNumbers) ? result.phoneNumbers : [],
+        intent: intent,
+        phoneNumbers: phoneNumbers,
         mainQuestion: result.mainQuestion || userMessage
       };
     } catch (parseError) {
       console.error('Error parsing intent analysis response:', parseError);
-      console.log('Raw response:', response);
       
-      // Fallback nếu không parse được JSON
+      // Fallback khi không parse được JSON
       return {
-        intent: 'UNKNOWN',
-        phoneNumbers: [],
+        intent: extractedNumbers.length > 0 ? 'ANALYZE_PHONE' : 'UNKNOWN',
+        phoneNumbers: extractedNumbers,
         mainQuestion: userMessage
       };
     }
   } catch (error) {
     console.error('Error calling Gemini for intent analysis:', error);
+    
+    // Fallback khi gọi API lỗi
     return {
-      intent: 'UNKNOWN',
-      phoneNumbers: [],
+      intent: extractedNumbers.length > 0 ? 'ANALYZE_PHONE' : 'UNKNOWN',
+      phoneNumbers: extractedNumbers,
       mainQuestion: userMessage
     };
   }
 }
 
+/**
+ * Quản lý ngữ cảnh số điện thoại
+ */
+const conversationManager = {
+  // Các phương thức hiện có
+  save: (userId, userMessage, aiResponse) => {
+    if (!userId) return;
+    
+    if (!conversationHistory.has(userId)) {
+      conversationHistory.set(userId, []);
+    }
+    
+    const userHistory = conversationHistory.get(userId);
+    
+    userHistory.push(
+      { role: 'user', content: userMessage },
+      { role: 'model', content: aiResponse }
+    );
+    
+    // Keep history within MAX_CONVERSATION_TURNS limit
+    if (userHistory.length > MAX_CONVERSATION_TURNS * 2) {
+      userHistory.splice(0, 2);
+    }
+    
+    conversationHistory.set(userId, userHistory);
+  },
+  
+  get: (userId) => conversationHistory.get(userId) || [],
+  
+  clear: (userId) => {
+    conversationHistory.delete(userId);
+    phoneContexts.delete(userId);
+  },
+  
+  hasActiveConversation: (userId) => conversationHistory.has(userId) && conversationHistory.get(userId).length > 0,
+  
+  // Thêm các phương thức mới để quản lý ngữ cảnh số điện thoại
+  saveCurrentPhone: (userId, phoneNumber, analysisData) => {
+    if (!userId) return;
+    
+    if (!phoneContexts.has(userId)) {
+      phoneContexts.set(userId, new Map());
+    }
+    
+    const userContext = phoneContexts.get(userId);
+    userContext.set('currentPhone', {
+      phoneNumber,
+      analysisData,
+      timestamp: Date.now()
+    });
+  },
+  
+  getCurrentPhone: (userId) => {
+    if (!userId || !phoneContexts.has(userId)) return null;
+    
+    return phoneContexts.get(userId).get('currentPhone');
+  },
+  
+  // Get analysis context from history
+  getContextFromHistory: (userId) => {
+    if (!userId || !conversationHistory.has(userId)) return null;
+    
+    // Ưu tiên lấy từ phoneContexts trước
+    const phoneContext = conversationManager.getCurrentPhone(userId);
+    if (phoneContext) {
+      return phoneContext.analysisData;
+    }
+    
+    // Nếu không có, thử tìm trong lịch sử hội thoại
+    const history = conversationHistory.get(userId);
+    for (let i = 0; i < history.length; i++) {
+      const msg = history[i];
+      if (msg.role === 'user' && msg.content.startsWith('CONTEXT_DATA:')) {
+        try {
+          const contextData = JSON.parse(history[i+1].content);
+          return contextData.analysisData;
+        } catch (error) {
+          console.error('Error parsing context data:', error);
+          return null;
+        }
+      }
+    }
+    return null;
+  }
+};
 
 /**
  * Xử lý tin nhắn đầu vào từ người dùng
@@ -107,8 +242,13 @@ async function analyzeUserIntent(userMessage) {
  */
 exports.handleUserMessage = async (message, userId = null) => {
   try {
-    // Phân tích ý định người dùng bằng Gemini
+    // Phân tích ý định người dùng
     const analysis = await analyzeUserIntent(message);
+    
+    // Log kết quả phân tích để debug
+    if (config.DEBUG) {
+      console.log('User intent analysis:', analysis);
+    }
     
     // Xử lý dựa trên ý định đã được phân tích
     switch (analysis.intent) {
@@ -409,11 +549,14 @@ const generatePrompt = (type, data) => {
         
         Cuối cùng, cho biết số nào phù hợp nhất cho mỗi khía cạnh và số nào tốt nhất nói chung.
       `;
-        // Log prompt được tạo ra
-    console.log('\n========= GENERATED PROMPT =========');
-    console.log(prompt);
-    console.log('===================================\n');
-        return prompt;
+      
+      if (config.DEBUG) {
+        console.log('\n========= GENERATED COMPARISON PROMPT =========');
+        console.log(prompt);
+        console.log('===================================\n');
+      }
+      
+      return prompt;
       
     case 'general':
       return `
@@ -449,59 +592,6 @@ const generatePrompt = (type, data) => {
       
     default:
       return data;
-  }
-};
-
-/**
- * Manage conversation history
- */
-const conversationManager = {
-  save: (userId, userMessage, aiResponse) => {
-    if (!userId) return;
-    
-    if (!conversationHistory.has(userId)) {
-      conversationHistory.set(userId, []);
-    }
-    
-    const userHistory = conversationHistory.get(userId);
-    
-    userHistory.push(
-      { role: 'user', content: userMessage },
-      { role: 'model', content: aiResponse }
-    );
-    
-    // Keep history within MAX_CONVERSATION_TURNS limit
-    if (userHistory.length > MAX_CONVERSATION_TURNS * 2) {
-      userHistory.splice(0, 2);
-    }
-    
-    conversationHistory.set(userId, userHistory);
-  },
-  
-  get: (userId) => conversationHistory.get(userId) || [],
-  
-  clear: (userId) => conversationHistory.delete(userId),
-  
-  hasActiveConversation: (userId) => conversationHistory.has(userId) && conversationHistory.get(userId).length > 0,
-  
-  // Get analysis context from history
-  getContextFromHistory: (userId) => {
-    if (!userId || !conversationHistory.has(userId)) return null;
-    
-    const history = conversationHistory.get(userId);
-    for (let i = 0; i < history.length; i++) {
-      const msg = history[i];
-      if (msg.role === 'user' && msg.content.startsWith('CONTEXT_DATA:')) {
-        try {
-          const contextData = JSON.parse(history[i+1].content);
-          return contextData.analysisData;
-        } catch (error) {
-          console.error('Error parsing context data:', error);
-          return null;
-        }
-      }
-    }
-    return null;
   }
 };
 
@@ -571,10 +661,11 @@ const callGeminiAPI = async (prompt, options = {}) => {
         // Hiển thị thông tin chi tiết về prompt
         console.log(`\n=============== GEMINI API CALL - ATTEMPT ${attempt} ===============`);
         console.log(`Prompt length: ${prompt.length} characters`);
-        console.log(`Using history: ${useHistory}, History length: ${useHistory && userId ? (getConversationHistory(userId).length / 2) : 0} turns`);
+        console.log(`Using history: ${useHistory}, History length: ${useHistory && userId ? (conversationManager.get(userId).length / 2) : 0} turns`);
         console.log(`\n=============== PROMPT CONTENT ===============`);
-        console.log(prompt); // Hiển thị toàn bộ nội dung prompt
-        console.log(`\n=============== END PROMPT CONTENT ===============\n`);      }
+        console.log(prompt.substring(0, 500) + '...'); // Hiển thị phần đầu của prompt
+        console.log(`\n=============== END PROMPT CONTENT ===============\n`);
+      }
       
       const response = await axios.post(apiUrl, requestBody, {
         headers: { 'Content-Type': 'application/json' },
@@ -672,6 +763,10 @@ module.exports = {
     
     // Save analysis context for future questions
     if (userId) {
+      // Lưu ngữ cảnh vào phoneContexts
+      conversationManager.saveCurrentPhone(userId, analysisData.phoneNumber, analysisData);
+      
+      // Lưu thêm vào lịch sử hội thoại để tương thích với code cũ
       const userContext = {
         phoneNumber: analysisData.phoneNumber,
         analysis: response,
@@ -688,10 +783,10 @@ module.exports = {
   /**
    * Generate response to a specific question about a phone number
    */
-  generateResponse: async (question, analysisContext, userId = null) => {
+  generateResponse: async (question, analysisData, userId = null) => {
     const prompt = generatePrompt('question', {
       question,
-      analysisContext
+      analysisData
     });
     
     return callGeminiAPI(prompt, { 
@@ -718,7 +813,7 @@ module.exports = {
     // If we have analysis data, use it for detailed context
     if (analysisData) {
       // Create a rich context prompt with all analysis details
-      const prompt = generatePrompt('followUp', {
+      const prompt = generatePrompt('question', {
         question: question,
         analysisData: analysisData
       });
@@ -730,9 +825,7 @@ module.exports = {
       });
     } else {
       // Use basic follow-up prompt if no specific context available
-      const prompt = generatePrompt('followUp', {
-        question: question
-      });
+      const prompt = generatePrompt('followUp', question);
       
       return callGeminiAPI(prompt, {
         temperature: 0.7,
@@ -775,9 +868,11 @@ module.exports = {
    * Clear conversation history for a user
    */
   clearConversation: (userId) => conversationManager.clear(userId),
-    // Thêm export mới
-    handleUserMessage: exports.handleUserMessage,
   
-    // Cho phép truy cập trực tiếp các hàm phân tích nếu cần
-    analyzeUserIntent: analyzeUserIntent
+  // Export các hàm phân tích cho việc testing
+  analyzeUserIntent,
+  extractPhoneNumbersFromText,
+  
+  // Export hàm xử lý tin nhắn
+  handleUserMessage: exports.handleUserMessage
 };

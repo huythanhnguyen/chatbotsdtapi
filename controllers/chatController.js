@@ -2,8 +2,6 @@
 const geminiService = require('../services/geminiService');
 const analysisService = require('../services/analysisService');
 const userService = require('../services/userService');
-// Ví dụ trong chatController.js hoặc file controller tương ứng
-const geminiService = require('../services/geminiService');
 
 // Xử lý tin nhắn chat
 exports.handleChatMessage = async (req, res) => {
