@@ -75,11 +75,11 @@ const generatePrompt = (type, data) => {
     - Sao có năng lượng cao (3-4/4)
     - Cặp sao liền kề, đặc biệt là cặp cuối cùng
     - Tổ hợp có năng lượng tổng hợp cao
-    - Các vị trí số đặc biệt
+    - Các vị trí số đặc biệt (gom lai thanh 1 doan)
     
     Phân tích theo các lĩnh vực sau đây bằng giọng điệu uyên thâm nhưng gần gũi:
     
-    **Tổng quan**
+    **Nổi bật**
     **1. Tính cách**: 
     **2. Sự nghiệp **: 
     **3. Tài lộc**: 
@@ -88,7 +88,7 @@ const generatePrompt = (type, data) => {
     **6. Nhân duyên**:
     **7. Sức khỏe**: 
     **8. Điểm lưu ý đặc biệt**: những vấn đề khác và  lời khuyên bổ sung
-    Khi mo ta trong cac doan nay, dung ** de bold vchi bold cac section nhu ben tren. 
+    Khi mo ta trong cac doan nay, dung ** de bold va chi bold cac section nhu ben tren. Khong bold trong 1 section de tranh bi sao nhang.
         
 
         # THÔNG TIN CHI TIẾT VỀ CÁC SAO
