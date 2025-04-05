@@ -277,3 +277,30 @@ exports.resetPassword = async (req, res) => {
     });
   }
 };
+
+// Đăng xuất người dùng
+exports.logout = async (req, res) => {
+  try {
+    // Lấy thông tin user từ middleware authenticate
+    const userId = req.user._id;
+    
+    // Ghi log đăng xuất
+    console.log(`User ${userId} logged out at ${new Date()}`);
+    
+    // Trả về phản hồi thành công
+    res.status(200).json({
+      success: true,
+      message: 'Đăng xuất thành công'
+    });
+    
+    // Lưu ý: JWT token vẫn có hiệu lực cho đến khi hết hạn
+    // Việc "logout" chỉ xảy ra ở phía client khi họ xóa token
+  } catch (error) {
+    console.error('Logout error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Lỗi khi đăng xuất',
+      error: error.message
+    });
+  }
+};

@@ -25,4 +25,7 @@ router.post('/forgot-password', authController.forgotPassword);
 // Đặt lại mật khẩu với token
 router.post('/reset-password', authController.resetPassword);
 
+// Đăng xuất
+router.post('/logout', authenticate, authController.logout);
+
 module.exports = router;
