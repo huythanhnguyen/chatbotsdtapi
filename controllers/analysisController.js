@@ -364,3 +364,17 @@ exports.deleteAnalysis = async (req, res) => {
     });
   }
 };
+
+// Thêm vào file server/controllers/analysisController.js
+
+// Method phân tích cơ bản không lưu vào database
+exports.getBasicAnalysis = async (phoneNumber) => {
+  try {
+    // Dùng service phân tích số nhưng không lưu kết quả
+    const result = await analysisService.analyzePhoneNumberWithoutSaving(phoneNumber);
+    return result;
+  } catch (error) {
+    console.error('Error in basic analysis:', error);
+    throw error;
+  }
+};
