@@ -8,6 +8,18 @@ exports.analyzePhoneNumber = async (req, res) => {
   try {
     const { phoneNumber } = req.body;
     const userId = req.user.id;
+    
+    // Method phân tích cơ bản không lưu vào database
+    exports.getBasicAnalysis = async (phoneNumber) => {
+      try {
+        // Dùng service phân tích số nhưng không lưu kết quả
+        const result = await analysisService.analyzePhoneNumberWithoutSaving(phoneNumber);
+        return result;
+      } catch (error) {
+        console.error('Error in basic analysis:', error);
+        throw error;
+      }
+    };
 
     // Kiểm tra xem số đã được phân tích trước đó chưa
     let existingAnalysis = await Analysis.findOne({ 

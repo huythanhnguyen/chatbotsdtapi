@@ -17,6 +17,18 @@ const DIGIT_MEANINGS = require('../constants/digitMeanings');
  * @returns {string} Formatted phone number
  */
 exports.formatPhoneNumber = (phoneNumber) => {
+
+// Phân tích số mà không lưu vào database
+exports.analyzePhoneNumberWithoutSaving = async (phoneNumber) => {
+  // Làm sạch số điện thoại
+  const cleanedNumber = phoneNumber.replace(/\D/g, '');
+  
+  // Gọi hàm phân tích core
+  const analysisResult = await analyzePhoneNumberCore(cleanedNumber);
+  
+  // Trả về kết quả mà không lưu vào DB
+  return analysisResult;
+};
     return phoneNumber.replace(/(\d{4})(\d{3})(\d{3})/, '$1 $2 $3');
 };
 
