@@ -93,7 +93,30 @@ const demoController = {
       // Sử dụng phương thức phân tích trực tiếp từ analysisService thay vì qua controller
       const analysisService = require('../services/analysisService');
       const analysisData = await analysisService.analyzePhoneNumberWithoutSaving(phoneNumber);
+      // Kiểm tra xem số điện thoại có phải là số Việt Nam không
+      const isVietnameseNumber = /^(0|\+84|84)(3|5|7|8|9)[0-9]{8}$/.test(phoneNumber.replace(/\D/g, ''));
       
+      if (!isVietnameseNumber) {
+        return res.status(400).json({ 
+          success: false, 
+          error: 'Số điện thoại không phải là số Việt Nam hợp lệ' 
+        });
+      }
+      
+      // Giới hạn số lượng phân tích demo mỗi phiên
+      const MAX_DEMO_ANALYSES = 3;
+      if (req.session && req.session.demoCount >= MAX_DEMO_ANALYSES) {
+        return res.status(403).json({
+          success: false,
+          error: 'Bạn đã sử dụng hết lượt phân tích demo. Vui lòng đăng ký tài khoản để tiếp tục.',
+          limitReached: true
+        });
+      }
+      
+      // Tăng số lần sử dụng demo
+      if (req.session) {
+        req.session.demoCount = (req.session.demoCount || 0) + 1;
+      }
       // Tạo phiên tạm thời cho người dùng
       const sessionId = req.session ? req.session.id : `temp_${Date.now()}`;
       
