@@ -17,19 +17,9 @@ const DIGIT_MEANINGS = require('../constants/digitMeanings');
  * @returns {string} Formatted phone number
  */
 exports.formatPhoneNumber = (phoneNumber) => {
-
-// Phân tích số mà không lưu vào database
-exports.analyzePhoneNumberWithoutSaving = async (phoneNumber) => {
-  // Làm sạch số điện thoại
-  const cleanedNumber = phoneNumber.replace(/\D/g, '');
-  
-  // Gọi hàm phân tích core
-  const analysisResult = await analyzePhoneNumberCore(cleanedNumber);
-  
-  // Trả về kết quả mà không lưu vào DB
-  return analysisResult;
-};
-    return phoneNumber.replace(/(\d{4})(\d{3})(\d{3})/, '$1 $2 $3');
+    // Đảm bảo phoneNumber là chuỗi
+    const phoneNumberStr = String(phoneNumber || '');
+    return phoneNumberStr.replace(/(\d{4})(\d{3})(\d{3})/, '$1 $2 $3');
 };
 
 /**
@@ -49,8 +39,11 @@ exports.getStarNatureClass = (nature) => {
  * @returns {object} Normalized number and special sequence information
  */
 exports.normalizePhoneNumber = (phoneNumber) => {
+    // Đảm bảo phoneNumber là chuỗi
+    const phoneNumberStr = String(phoneNumber || '');
+    
     // Remove non-digit characters
-    let cleaned = phoneNumber.replace(/\D/g, '');
+    let cleaned = phoneNumberStr.replace(/\D/g, '');
     
     // 01 - Still remove the leading 0 if present
     if (cleaned.startsWith('0')) {
@@ -1295,8 +1288,11 @@ exports.calculateQualityScore = (analysisData) => {
  * @returns {object} Complete analysis
  */
 exports.analyzePhoneNumber = (phoneNumber, userContext = {}) => {
+    // Đảm bảo phoneNumber là chuỗi
+    const phoneNumberStr = String(phoneNumber || '');
+    
     // Clean input
-    const cleanNumber = phoneNumber.replace(/\D/g, '');
+    const cleanNumber = phoneNumberStr.replace(/\D/g, '');
     
     if (cleanNumber.length < 10) {
         return { error: "Số điện thoại phải có ít nhất 10 chữ số." };
@@ -1522,4 +1518,20 @@ exports.analyzeCompatibility = (phoneNumber, targetType) => {
     }
     
     return compatibility;
+};
+
+/**
+ * Phân tích số mà không lưu vào database
+ * @param {string} phoneNumber - Số điện thoại cần phân tích
+ * @returns {object} Kết quả phân tích
+ */
+exports.analyzePhoneNumberWithoutSaving = async (phoneNumber) => {
+    // Đảm bảo phoneNumber là chuỗi
+    const phoneNumberStr = String(phoneNumber || '');
+    
+    // Gọi hàm phân tích chính
+    const analysisResult = this.analyzePhoneNumber(phoneNumberStr);
+    
+    // Trả về kết quả mà không lưu vào DB
+    return analysisResult;
 };

@@ -21,10 +21,13 @@ exports.analyzePhoneNumber = async (req, res) => {
       }
     };
 
+    // Đảm bảo phoneNumber là chuỗi
+    const phoneNumberStr = String(phoneNumber || '');
+
     // Kiểm tra xem số đã được phân tích trước đó chưa
     let existingAnalysis = await Analysis.findOne({ 
       userId, 
-      phoneNumber: phoneNumber.replace(/\D/g, '') 
+      phoneNumber: phoneNumberStr.replace(/\D/g, '') 
     }).sort({ createdAt: -1 });
 
     // Nếu đã phân tích trong vòng 24 giờ qua, trả về kết quả có sẵn
@@ -38,7 +41,7 @@ exports.analyzePhoneNumber = async (req, res) => {
     }
 
     // Thực hiện phân tích
-    const analysisResult = analysisService.analyzePhoneNumber(phoneNumber);
+    const analysisResult = analysisService.analyzePhoneNumber(phoneNumberStr);
     
     if (analysisResult.error) {
       return res.status(400).json({
@@ -53,7 +56,7 @@ exports.analyzePhoneNumber = async (req, res) => {
     // Lưu kết quả vào database
     const newAnalysis = new Analysis({
       userId,
-      phoneNumber: phoneNumber.replace(/\D/g, ''),
+      phoneNumber: phoneNumberStr.replace(/\D/g, ''),
       result: analysisResult,
       geminiResponse
     });
@@ -217,8 +220,10 @@ exports.askQuestion = async (req, res) => {
           let followupRecord;
           
           if (phoneNumber) {
+            // Đảm bảo phoneNumber là chuỗi
+            const phoneNumberStr = String(phoneNumber || '');
             followupRecord = await Analysis.findOne({ 
-              phoneNumber: phoneNumber.replace(/\D/g, ''),
+              phoneNumber: phoneNumberStr.replace(/\D/g, ''),
               userId
             }).sort({ createdAt: -1 });
           } else {
