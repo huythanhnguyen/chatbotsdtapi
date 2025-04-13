@@ -17,11 +17,24 @@ app.use(cors({
 
 app.use(express.json());
 
+// Debug endpoint kiểm tra
+app.get('/api/debug', (req, res) => {
+  res.status(200).json({
+    success: true, 
+    message: 'API is working',
+    endpoints: [
+      '/api/payments/user/questions',
+      '/api/payments/create',
+      '/api/payments/history'
+    ]
+  });
+});
+
 // Routes
 app.use('/api/auth', authRoutes);
 app.use('/api/analysis', analysisRoutes);
 app.use('/api/user', userRoutes);
-app.use('/api', paymentRoutes);
+app.use('/api/payments', paymentRoutes); // Đổi tiền tố thành '/api/payments'
 app.use('/api/admin', adminRoutes);
 // Demo routes không cần xác thực
 const demoRoutes = require('./routes/demoRoutes');
