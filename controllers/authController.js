@@ -1,11 +1,12 @@
 // server/controllers/authController.js
 const jwt = require('jsonwebtoken');
 const User = require('../models/User');
+const config = require('../config/env');
 
 // Helper: Tạo JWT token
 const generateToken = (id) => {
-  return jwt.sign({ id }, process.env.JWT_SECRET, {
-    expiresIn: '30d'
+  return jwt.sign({ id }, config.JWT_SECRET, {
+    expiresIn: config.JWT_EXPIRES
   });
 };
 
@@ -23,12 +24,14 @@ exports.register = async (req, res) => {
       });
     }
 
-    // Tạo người dùng mới
+    // Tạo người dùng mới với remainingQuestions và isPremium
     const user = await User.create({
       name,
       email,
       password,
-      phoneNumber
+      phoneNumber,
+      remainingQuestions: config.TRIAL_QUESTIONS,
+      isPremium: false
     });
 
     // Tạo token
@@ -42,7 +45,9 @@ exports.register = async (req, res) => {
         name: user.name,
         email: user.email,
         phoneNumber: user.phoneNumber,
-        role: user.role
+        role: user.role,
+        remainingQuestions: user.remainingQuestions,
+        isPremium: user.isPremium
       }
     });
   } catch (error) {
@@ -102,7 +107,9 @@ exports.login = async (req, res) => {
         name: user.name,
         email: user.email,
         phoneNumber: user.phoneNumber,
-        role: user.role
+        role: user.role,
+        remainingQuestions: user.remainingQuestions,
+        isPremium: user.isPremium
       }
     });
   } catch (error) {
@@ -129,7 +136,9 @@ exports.getCurrentUser = async (req, res) => {
         phoneNumber: user.phoneNumber,
         role: user.role,
         createdAt: user.createdAt,
-        lastLogin: user.lastLogin
+        lastLogin: user.lastLogin,
+        remainingQuestions: user.remainingQuestions,
+        isPremium: user.isPremium
       }
     });
   } catch (error) {
@@ -141,6 +150,7 @@ exports.getCurrentUser = async (req, res) => {
     });
   }
 };
+
 // Xác thực token
 exports.verifyToken = async (req, res) => {
   try {
@@ -155,7 +165,9 @@ exports.verifyToken = async (req, res) => {
         phoneNumber: req.user.phoneNumber,
         role: req.user.role,
         createdAt: req.user.createdAt,
-        lastLogin: req.user.lastLogin
+        lastLogin: req.user.lastLogin,
+        remainingQuestions: req.user.remainingQuestions,
+        isPremium: req.user.isPremium
       }
     });
   } catch (error) {

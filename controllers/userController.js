@@ -3,6 +3,53 @@ const User = require('../models/User');
 const Analysis = require('../models/Analysis');
 
 /**
+ * Lấy thông tin cá nhân của người dùng
+ * @route GET /api/user/profile
+ * @access Private
+ */
+exports.getProfile = async (req, res) => {
+  try {
+    const userId = req.user.id;
+    
+    // Lấy thông tin người dùng từ database
+    const user = await User.findById(userId);
+    
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: 'Không tìm thấy người dùng'
+      });
+    }
+    
+    // Đếm số lượng phân tích đã thực hiện
+    const analysesCount = await Analysis.countDocuments({ userId });
+    
+    res.json({
+      success: true,
+      user: {
+        id: user._id,
+        name: user.name,
+        email: user.email,
+        phoneNumber: user.phoneNumber,
+        role: user.role,
+        createdAt: user.createdAt,
+        lastLogin: user.lastLogin,
+        remainingQuestions: user.remainingQuestions,
+        isPremium: user.isPremium,
+        analysesCount
+      }
+    });
+  } catch (error) {
+    console.error('Get profile error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Lỗi khi lấy thông tin cá nhân',
+      error: error.message
+    });
+  }
+};
+
+/**
  * Cập nhật thông tin người dùng
  * @route PUT /api/user/profile
  * @access Private
@@ -245,6 +292,70 @@ exports.disableUser = async (req, res) => {
     res.status(500).json({
       success: false,
       message: 'Lỗi khi vô hiệu hóa người dùng',
+      error: error.message
+    });
+  }
+};
+
+/**
+ * Đổi mật khẩu
+ * @route PUT /api/user/change-password
+ * @access Private
+ */
+exports.changePassword = async (req, res) => {
+  try {
+    const { currentPassword, newPassword } = req.body;
+    const userId = req.user.id;
+
+    // Kiểm tra dữ liệu đầu vào
+    if (!currentPassword || !newPassword) {
+      return res.status(400).json({
+        success: false,
+        message: 'Vui lòng cung cấp mật khẩu hiện tại và mật khẩu mới'
+      });
+    }
+
+    // Kiểm tra mật khẩu mới có đủ độ dài không
+    if (newPassword.length < 6) {
+      return res.status(400).json({
+        success: false,
+        message: 'Mật khẩu mới phải có ít nhất 6 ký tự'
+      });
+    }
+
+    // Lấy người dùng với mật khẩu
+    const user = await User.findById(userId).select('+password');
+
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: 'Không tìm thấy người dùng'
+      });
+    }
+
+    // Kiểm tra mật khẩu hiện tại
+    const isMatch = await user.matchPassword(currentPassword);
+
+    if (!isMatch) {
+      return res.status(400).json({
+        success: false,
+        message: 'Mật khẩu hiện tại không chính xác'
+      });
+    }
+
+    // Cập nhật mật khẩu mới
+    user.password = newPassword;
+    await user.save();
+
+    res.json({
+      success: true,
+      message: 'Đổi mật khẩu thành công'
+    });
+  } catch (error) {
+    console.error('Change password error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Lỗi khi đổi mật khẩu',
       error: error.message
     });
   }

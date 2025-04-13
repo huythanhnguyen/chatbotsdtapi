@@ -4,6 +4,8 @@ const cors = require('cors');
 const authRoutes = require('./routes/auth');
 const analysisRoutes = require('./routes/analysis');
 const userRoutes = require('./routes/user');
+const paymentRoutes = require('./routes/paymentRoutes');
+const adminRoutes = require('./routes/adminRoutes');
 
 const app = express();
 
@@ -19,6 +21,8 @@ app.use(express.json());
 app.use('/api/auth', authRoutes);
 app.use('/api/analysis', analysisRoutes);
 app.use('/api/user', userRoutes);
+app.use('/api', paymentRoutes);
+app.use('/api/admin', adminRoutes);
 // Demo routes không cần xác thực
 const demoRoutes = require('./routes/demoRoutes');
 app.use('/api/demo', demoRoutes);

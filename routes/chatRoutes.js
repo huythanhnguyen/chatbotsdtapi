@@ -3,6 +3,8 @@ const express = require('express');
 const router = express.Router();
 const geminiService = require('../services/geminiService');
 const analysisService = require('../services/analysisService');
+const { authenticate } = require('../middleware/auth');
+const { checkQuota } = require('../middleware/quotaMiddleware');
 
 // Middleware kiểm tra session
 const checkSession = (req, res, next) => {
@@ -15,11 +17,11 @@ const checkSession = (req, res, next) => {
   next();
 };
 
-// Route phân tích số điện thoại
-router.post('/analyze', checkSession, async (req, res) => {
+// Route phân tích số điện thoại - yêu cầu xác thực và kiểm tra quota
+router.post('/analyze', authenticate, checkQuota, async (req, res) => {
   try {
     const { phoneNumber } = req.body;
-    const userId = req.session.userId;
+    const userId = req.user ? req.user.id : null;
     
     if (!phoneNumber || phoneNumber.length < 10) {
       return res.status(400).json({ error: 'Số điện thoại không hợp lệ' });
@@ -47,11 +49,11 @@ router.post('/analyze', checkSession, async (req, res) => {
   }
 });
 
-// Route xử lý câu hỏi
-router.post('/question', checkSession, async (req, res) => {
+// Route xử lý câu hỏi - yêu cầu xác thực và kiểm tra quota
+router.post('/question', authenticate, checkQuota, async (req, res) => {
   try {
     const { question, phoneNumber } = req.body;
-    const userId = req.session.userId;
+    const userId = req.user ? req.user.id : null;
     
     if (!question) {
       return res.status(400).json({ error: 'Vui lòng nhập câu hỏi' });
@@ -99,10 +101,14 @@ router.post('/question', checkSession, async (req, res) => {
   }
 });
 
-// Route xóa session
-router.post('/clear', checkSession, (req, res) => {
+// Route xóa lịch sử hội thoại - yêu cầu xác thực (không cần kiểm tra quota)
+router.post('/clear', authenticate, (req, res) => {
   try {
-    const userId = req.session.userId;
+    const userId = req.user ? req.user.id : null;
+    
+    if (!userId) {
+      return res.status(401).json({ error: 'Người dùng không được xác thực' });
+    }
     
     // Xóa dữ liệu phân tích khỏi session
     delete req.session.currentPhoneNumber;

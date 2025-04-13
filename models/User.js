@@ -1,6 +1,10 @@
 // server/models/User.js
 const mongoose = require('mongoose');
 const bcrypt = require('bcryptjs');
+const config = require('../config/env');
+
+// Lấy số lượng câu hỏi dùng thử từ cấu hình
+const defaultTrialQuestions = config.TRIAL_QUESTIONS;
 
 const userSchema = new mongoose.Schema({
   name: {
@@ -30,6 +34,14 @@ const userSchema = new mongoose.Schema({
   phoneNumber: {
     type: String,
     trim: true
+  },
+  remainingQuestions: {
+    type: Number,
+    default: defaultTrialQuestions
+  },
+  isPremium: {
+    type: Boolean,
+    default: false
   },
   createdAt: {
     type: Date,
