@@ -98,6 +98,18 @@
 - [ ] Tối ưu hóa thời gian tải trang
 - [ ] Thêm các thông báo trạng thái thanh toán
 
+### Phân tích CCCD
+- [ ] Triển khai API phân tích căn cước công dân (CCCD) với các quy tắc sau:
+    - Chỉ phân tích 6 chữ số cuối của CCCD.
+    - Nếu gặp số 0, sử dụng số kế trước bên tay trái. Nếu số kế trước cũng là 0, tiếp tục tiến về bên trái đến khi gặp số khác 0.
+    - Phân tích thành từng cặp số để xác định các cặp sao dựa trên nguyên lý Bát Cực Linh Số.
+    - Tham khảo @services/analysisService.js để tách số và hiển thị từng nhóm, dãy số.
+    - [ ] Tạo controller và route cho API phân tích CCCD
+    - [ ] Viết hàm chuẩn hóa dãy số CCCD (loại bỏ số 0 theo rule)
+    - [ ] Viết hàm tách số thành từng cặp
+    - [ ] Viết hàm phân tích từng cặp số dựa trên nguyên lý Bát Cực Linh Số
+    - [ ] Viết hàm tổng hợp kết quả phân tích và trả về cho client
+
 ## Lịch trình phát hành
 
 ### v1.0.0 (Hiện tại)
