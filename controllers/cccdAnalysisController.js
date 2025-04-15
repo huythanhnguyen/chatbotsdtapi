@@ -162,7 +162,8 @@ const analyzeCccdNumbers = (cccdNumber) => {
       // 6. Generate Summary
       const starSequence = analysisData.pairsAnalysis.map(p => p.star).join(' -> ');
       analysisData.summary = `Phân tích dựa trên chuỗi số chuẩn hóa '${normalized}' (${pairs.length} cặp số, ${analysisData.combinationsAnalysis.length} kết hợp). Chuỗi sao: ${starSequence}.`;
-      if (pairs.length < 5 && digits.includes('5')) { // Check original digits for 5
+      // Corrected check: Use lastSix which is available in this scope
+      if (pairs.length < 5 && lastSix.includes('5')) { 
          analysisData.summary += ` (Lưu ý: Số cặp số ít hơn 5 do có số 5 trong 6 số cuối).` 
       }
   }
