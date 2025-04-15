@@ -7,13 +7,14 @@ const COMBINATIONS = require('../constants/combinations.js'); // Corrected impor
 
 /**
  * Normalizes the digit sequence based on CCCD rules:
- * 1. Handles '0': Replaces '0' with the first preceding non-'0' digit (or '1' if none).
+ * 1. Handles '0': Replaces '0' with the first preceding non-'0' digit (or the last digit of the original 6 if none).
  * 2. Handles '5': Removes '5' from the sequence entirely.
  * @param {string} digits - The 6-digit sequence to normalize.
  * @returns {string} The normalized sequence (may be shorter than 6 digits).
  */
 const normalizeCccdSequence = (digits) => {
     let processedDigits = digits.split('');
+    const lastOriginalDigit = digits[digits.length - 1]; // Store the last original digit
 
     // Step 1: Handle '0's
     for (let i = 0; i < processedDigits.length; i++) {
@@ -22,8 +23,8 @@ const normalizeCccdSequence = (digits) => {
             while (j >= 0 && processedDigits[j] === '0') {
                 j--;
             }
-            // Use the found non-zero digit or default to '1' if no non-zero found before it
-            processedDigits[i] = (j >= 0) ? processedDigits[j] : '1'; 
+            // Use the found non-zero digit or default to the last original digit if no non-zero found before it
+            processedDigits[i] = (j >= 0) ? processedDigits[j] : lastOriginalDigit; 
         }
     }
 
@@ -161,7 +162,7 @@ const analyzeCccdNumbers = (cccdNumber) => {
       // 6. Generate Summary
       const starSequence = analysisData.pairsAnalysis.map(p => p.star).join(' -> ');
       analysisData.summary = `Phân tích dựa trên chuỗi số chuẩn hóa '${normalized}' (${pairs.length} cặp số, ${analysisData.combinationsAnalysis.length} kết hợp). Chuỗi sao: ${starSequence}.`;
-      if (pairs.length < 5) {
+      if (pairs.length < 5 && digits.includes('5')) { // Check original digits for 5
          analysisData.summary += ` (Lưu ý: Số cặp số ít hơn 5 do có số 5 trong 6 số cuối).` 
       }
   }
