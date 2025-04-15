@@ -81,3 +81,4 @@ ehthumbs_vista.db
 /dist
 /build
 /out 
+.idx/dev.nix

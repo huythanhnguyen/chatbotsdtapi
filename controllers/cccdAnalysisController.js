@@ -1,7 +1,7 @@
 // const User = require('../models/User'); // No longer needed
 // const Analysis = require('../models/Analysis'); // Optional: Logging
 const BAT_TINH = require('../constants/batTinh'); 
-const COMBINATIONS = require('../constants/combinations').COMBINATION_INTERPRETATIONS;
+const COMBINATIONS = require('../constants/combinations.js'); // Corrected import
 
 // --- Helper Functions --- 
 
